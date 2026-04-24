@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { projectsAPI, clientsAPI, milestonesAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
 import { useConfig } from '../hooks/useConfig';
+import type { Client, Project, Milestone } from '../types';
 
 const emptyForm = {
   name: '', clientId: '', type: '', description: '',
@@ -16,14 +17,14 @@ export default function Projects() {
   const { config } = useConfig();
   const STATUSES = config.projectStatuses || [];
   const TYPES = config.projectTypes || [];
-  const [projects, setProjects] = useState<any[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
-  const [milestones, setMilestones] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showMsModal, setShowMsModal] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
-  const [editingMs, setEditingMs] = useState<any>(null);
+  const [editing, setEditing] = useState<Project | null>(null);
+  const [editingMs, setEditingMs] = useState<Milestone | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [msForm, setMsForm] = useState<any>({ ...emptyMilestone });
   const [activeProjId, setActiveProjId] = useState<string | null>(null);
@@ -42,7 +43,7 @@ export default function Projects() {
   const clientName = (id: string) => clients.find(c => c.id === id)?.name || '-';
 
   const openCreate = () => { setEditing(null); setForm(emptyForm); setShowModal(true); };
-  const openEdit = (p: any) => { setEditing(p); setForm({ ...emptyForm, ...p }); setShowModal(true); };
+  const openEdit = (p: Project) => { setEditing(p); setForm({ ...emptyForm, ...p, budget: String(p.budget ?? ''), estimatedHours: String(p.estimatedHours ?? '') }); setShowModal(true); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

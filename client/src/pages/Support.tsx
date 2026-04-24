@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, Headphones, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supportAPI, clientsAPI, projectsAPI } from '../services/api';
 import { useConfig } from '../hooks/useConfig';
+import type { Client, Project, SupportTicket } from '../types';
 
 const emptyForm = {
   clientId: '', clientName: '', projectId: '', projectName: '',
@@ -15,12 +16,12 @@ export default function Support() {
   const STATUSES = config.supportStatuses || [];
   const PRIORITIES = config.supportPriorities || [];
   const TYPES = config.supportTypes || [];
-  const [tickets, setTickets] = useState<any[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
-  const [projects, setProjects] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
+  const [editing, setEditing] = useState<SupportTicket | null>(null);
   const [form, setForm] = useState<any>(emptyForm);
   const [filter, setFilter] = useState('All');
 
@@ -123,7 +124,7 @@ export default function Support() {
                       {STATUSES.map(s => <option key={s}>{s}</option>)}
                     </select>
                   </td>
-                  <td style={{ fontSize: 11, color: 'var(--gray-400)' }}>{new Date(t.createdAt).toLocaleDateString('en-IN')}</td>
+                  <td style={{ fontSize: 11, color: 'var(--gray-400)' }}>{t.createdAt ? new Date(t.createdAt).toLocaleDateString('en-IN') : '-'}</td>
                   <td>
                     <div style={{ display: 'flex', gap: 5 }}>
                       <button className="btn btn-ghost btn-xs" onClick={() => openEdit(t)}><Pencil size={12} /></button>

@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { quotationsAPI, clientsAPI, projectsAPI, pdfAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
 import { useConfig } from '../hooks/useConfig';
+import type { Client, Project, Quotation } from '../types';
 
 const emptyItem = { description: '', serviceType: '', quantity: 1, unitPrice: 0 };
 const emptyForm = {
@@ -18,12 +19,12 @@ export default function Quotations() {
   const { config } = useConfig();
   const STATUSES = config.quotationStatuses || [];
   const SERVICE_TYPES = config.services || [];
-  const [quotations, setQuotations] = useState<any[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
-  const [projects, setProjects] = useState<any[]>([]);
+  const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
+  const [editing, setEditing] = useState<Quotation | null>(null);
   const [form, setForm] = useState<any>(emptyForm);
   const [genLoading, setGenLoading] = useState<string | null>(null);
 
@@ -125,7 +126,7 @@ export default function Quotations() {
                     <div style={{ fontWeight: 600 }}>{q.clientName}</div>
                     <div style={{ fontSize: 11, color: 'var(--gray-400)' }}>{q.clientCompany}</div>
                   </td>
-                  <td><strong>{fmt(q.total)}</strong></td>
+                  <td><strong>{fmt(q.total ?? 0)}</strong></td>
                   <td style={{ fontSize: 12 }}>{q.validUntil ? new Date(q.validUntil).toLocaleDateString('en-IN') : '-'}</td>
                   <td><span className={`badge badge-${(q.status || 'draft').toLowerCase()}`}>{q.status}</span></td>
                   <td>

@@ -1,17 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { readData, writeData } = require('../utils/db');
-const mongoose = require('mongoose');
+const { readData, writeData, useMongo, generateNumber } = require('../utils/db');
 const { Proposal } = require('../models');
-
-const useMongo = () => mongoose.connection.readyState === 1;
-
-const generateNumber = (prefix, list) => {
-  const year = new Date().getFullYear();
-  const count = list.filter(i => i.number && i.number.startsWith(`${prefix}-${year}`)).length + 1;
-  return `${prefix}-${year}-${String(count).padStart(4, '0')}`;
-};
 
 router.get('/', async (req, res) => {
   try {

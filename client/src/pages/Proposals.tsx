@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { proposalsAPI, clientsAPI, pdfAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
 import { useConfig } from '../hooks/useConfig';
+import type { Client, Proposal } from '../types';
 
 const emptyForm: any = {
   clientId: '', clientName: '', clientEmail: '', clientCompany: '',
@@ -23,11 +24,11 @@ const emptyForm: any = {
 export default function Proposals() {
   const { config } = useConfig();
   const STATUSES = config.proposalStatuses || [];
-  const [proposals, setProposals] = useState<any[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
+  const [editing, setEditing] = useState<Proposal | null>(null);
   const [form, setForm] = useState<any>(emptyForm);
   const [genLoading, setGenLoading] = useState<string | null>(null);
   const [techInput, setTechInput] = useState('');

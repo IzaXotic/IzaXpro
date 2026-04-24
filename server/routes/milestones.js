@@ -1,11 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { readData, writeData } = require('../utils/db');
-const mongoose = require('mongoose');
+const { readData, writeData, useMongo } = require('../utils/db');
 const { Milestone, Project } = require('../models');
-
-const useMongo = () => mongoose.connection.readyState === 1;
 
 router.get('/', async (req, res) => {
   try {

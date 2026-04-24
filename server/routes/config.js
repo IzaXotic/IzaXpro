@@ -3,19 +3,13 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs-extra');
 const mongoose = require('mongoose');
+const { useMongo } = require('../utils/db');
 
 const CONFIG_PATH = path.join(__dirname, '../data/config.json');
 
-// Simple Mongoose model for config (single document)
-let ConfigModel;
-if (mongoose.models && mongoose.models.Config) {
-  ConfigModel = mongoose.models.Config;
-} else {
-  const ConfigSchema = new mongoose.Schema({ data: mongoose.Schema.Types.Mixed }, { timestamps: true });
-  ConfigModel = mongoose.model('Config', ConfigSchema);
-}
-
-const useMongo = () => mongoose.connection.readyState === 1;
+// Config is stored as a single document in MongoDB; fields mirror config.json keys.
+const ConfigModel = mongoose.models.Config ||
+  mongoose.model('Config', new mongoose.Schema({ data: mongoose.Schema.Types.Mixed }, { timestamps: true }));
 
 const readConfig = () => fs.readJsonSync(CONFIG_PATH);
 const writeConfig = (data) => fs.writeJsonSync(CONFIG_PATH, data, { spaces: 2 });

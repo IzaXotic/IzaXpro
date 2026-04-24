@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { clientsAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
 import { useConfig } from '../hooks/useConfig';
+import type { Client } from '../types';
 
 const emptyForm = {
   name: '', email: '', phone: '', company: '', address: '',
@@ -14,10 +15,10 @@ export default function Clients() {
   const { config } = useConfig();
   const STATUSES = config.clientStatuses || [];
   const SERVICES = config.services || [];
-  const [clients, setClients] = useState<any[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
+  const [editing, setEditing] = useState<Client | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [search, setSearch] = useState('');
 
@@ -30,7 +31,7 @@ export default function Clients() {
   useEffect(() => { load(); }, []);
 
   const openCreate = () => { setEditing(null); setForm(emptyForm); setShowModal(true); };
-  const openEdit = (c: any) => { setEditing(c); setForm({ ...emptyForm, ...c, services: c.services || [] }); setShowModal(true); };
+  const openEdit = (c: Client) => { setEditing(c); setForm({ ...emptyForm, ...c, budget: String(c.budget ?? ''), services: c.services || [] }); setShowModal(true); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +102,7 @@ export default function Clients() {
                     {(c.services || []).slice(0, 2).map((s: string) => (
                       <span key={s} style={{ display: 'inline-block', background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600, marginRight: 3 }}>{s}</span>
                     ))}
-                    {(c.services || []).length > 2 && <span style={{ fontSize: 11, color: 'var(--gray-400)' }}>+{c.services.length - 2}</span>}
+                    {(c.services || []).length > 2 && <span style={{ fontSize: 11, color: 'var(--gray-400)' }}>+{(c.services || []).length - 2}</span>}
                   </td>
                   <td>{c.budget ? `₹${Number(c.budget).toLocaleString('en-IN')}` : '-'}</td>
                   <td><span className={`badge badge-${(c.status || 'new').toLowerCase().replace(' ', '')}`}>{c.status}</span></td>

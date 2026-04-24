@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { invoicesAPI, clientsAPI, projectsAPI, pdfAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
 import { useConfig } from '../hooks/useConfig';
+import type { Client, Project, Invoice } from '../types';
 
 const emptyItem = { description: '', serviceType: '', quantity: 1, unitPrice: 0 };
 const emptyForm = {
@@ -18,12 +19,12 @@ export default function Invoices() {
   const { config } = useConfig();
   const STATUSES = config.invoiceStatuses || [];
   const SERVICE_TYPES = config.services || [];
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const [clients, setClients]   = useState<any[]>([]);
-  const [projects, setProjects] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [clients, setClients]   = useState<Client[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading]   = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing]   = useState<any>(null);
+  const [editing, setEditing]   = useState<Invoice | null>(null);
   const [form, setForm]         = useState<any>(emptyForm);
   const [genLoading, setGenLoading] = useState<string | null>(null);
 
@@ -155,7 +156,7 @@ export default function Invoices() {
                     <div style={{ fontSize: 11, color: 'var(--gray-400)' }}>{inv.clientCompany}</div>
                   </td>
                   <td style={{ fontSize: 12 }}>{inv.projectName || '-'}</td>
-                  <td><strong>{fmt(inv.total)}</strong></td>
+                  <td><strong>{fmt(inv.total ?? 0)}</strong></td>
                   <td style={{ fontSize: 12 }}>{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString('en-IN') : '-'}</td>
                   <td>
                     <select
