@@ -6,9 +6,9 @@ const { Quotation, Invoice } = require('../models');
 
 const calculateTotals = (items = [], taxRate = 0, discount = 0) => {
   const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-  const discountAmt = (subtotal * discount) / 100;
+  const discountAmt = Math.min(Number(discount) || 0, subtotal);
   const taxableAmount = subtotal - discountAmt;
-  const taxAmount = (taxableAmount * taxRate) / 100;
+  const taxAmount = Math.round((taxableAmount * taxRate) / 100);
   const total = taxableAmount + taxAmount;
   return { subtotal, discountAmt, taxAmount, total };
 };

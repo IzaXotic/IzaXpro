@@ -51,7 +51,7 @@ export default function Quotations() {
   const updateItem = (idx: number, field: string, val: any) => {
     setForm((f: any) => {
       const items = [...f.items];
-      items[idx] = { ...items[idx], [field]: field === 'quantity' || field === 'unitPrice' ? Number(val) : val };
+      items[idx] = { ...items[idx], [field]: val };
       return { ...f, items };
     });
   };
@@ -190,8 +190,8 @@ export default function Quotations() {
                         <select value={item.serviceType} onChange={e => updateItem(idx, 'serviceType', e.target.value)}>
                           {SERVICE_TYPES.map(t => <option key={t}>{t}</option>)}
                         </select>
-                        <input type="number" min={1} value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} />
-                        <input type="number" min={0} value={item.unitPrice} onChange={e => updateItem(idx, 'unitPrice', e.target.value)} />
+                        <input type="number" min={1} value={item.quantity === 0 || item.quantity === '' ? '' : item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} />
+                        <input type="number" min={0} value={item.unitPrice === 0 || item.unitPrice === '' ? '' : item.unitPrice} onChange={e => updateItem(idx, 'unitPrice', e.target.value)} />
                         <div style={{ fontWeight: 700 }}>{fmt(item.quantity * item.unitPrice)}</div>
                         <button type="button" onClick={() => setForm((f: any) => ({ ...f, items: f.items.filter((_: any, i: number) => i !== idx) }))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }} disabled={form.items.length === 1}>✕</button>
                       </div>
@@ -208,12 +208,12 @@ export default function Quotations() {
                     </div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                       <span style={{ flex: 1, color: 'rgba(255,255,255,0.6)' }}>Discount (₹)</span>
-                      <input type="number" min={0} className="form-input" style={{ width: 90, padding: '4px 8px', fontSize: 13, textAlign: 'right' }} value={form.discount} onChange={e => setForm((f: any) => ({ ...f, discount: Number(e.target.value) }))} placeholder="0" />
+                      <input type="number" min={0} className="form-input" style={{ width: 90, padding: '4px 8px', fontSize: 13, textAlign: 'right' }} value={form.discount === 0 || form.discount === '' ? '' : form.discount} onChange={e => setForm((f: any) => ({ ...f, discount: e.target.value }))} placeholder="0" />
                       <span style={{ minWidth: 80, textAlign: 'right', color: '#34d399', fontWeight: 600 }}>{totals.discountAmt > 0 ? `−${fmt(totals.discountAmt)}` : '—'}</span>
                     </div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                       <span style={{ flex: 1, color: 'rgba(255,255,255,0.6)' }}>GST (%)</span>
-                      <input type="number" min={0} max={30} className="form-input" style={{ width: 90, padding: '4px 8px', fontSize: 13, textAlign: 'right' }} value={form.taxRate} onChange={e => setForm((f: any) => ({ ...f, taxRate: Number(e.target.value) }))} />
+                      <input type="number" min={0} max={30} className="form-input" style={{ width: 90, padding: '4px 8px', fontSize: 13, textAlign: 'right' }} value={form.taxRate === 0 || form.taxRate === '' ? '' : form.taxRate} onChange={e => setForm((f: any) => ({ ...f, taxRate: e.target.value }))} />
                       <span style={{ minWidth: 80, textAlign: 'right', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>+{fmt(totals.taxAmount)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, fontSize: 20, padding: '12px 0 4px', color: '#a78bfa' }}>
