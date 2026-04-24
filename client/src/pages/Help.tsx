@@ -214,7 +214,7 @@ Total           = Taxable Amount + Tax`}
     q: 'How do I generate a PDF for a document?',
     a: (
       <p>
-        On the <strong>Invoices</strong>, <strong>Quotations</strong>, and <strong>Proposals</strong> pages, every row in the table has a <strong style={{ color: '#a78bfa' }}>PDF</strong> button (download icon). Clicking it calls the backend Puppeteer renderer and downloads a branded IzaXotic PDF immediately. Make sure the backend server is running on port <code style={{ fontFamily: "'JetBrains Mono', monospace", color: '#c4b5fd' }}>5001</code>.
+        On the <strong>Invoices</strong>, <strong>Quotations</strong>, and <strong>Proposals</strong> pages, every row in the table has a <strong style={{ color: '#a78bfa' }}>PDF</strong> button (download icon). Clicking it calls the backend Puppeteer renderer and downloads a branded IzaXpro PDF immediately. Make sure the backend server is running on port <code style={{ fontFamily: "'JetBrains Mono', monospace", color: '#c4b5fd' }}>5001</code>.
       </p>
     ),
   },
@@ -302,7 +302,7 @@ const Help: React.FC = () => {
           <BookOpen size={20} color="white" />
         </div>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 17, letterSpacing: '-0.4px', marginBottom: 3 }}>IzaXotic BMS — Team Knowledge Base</div>
+          <div style={{ fontWeight: 800, fontSize: 17, letterSpacing: '-0.4px', marginBottom: 3 }}>IzaXpro — Team Knowledge Base</div>
           <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.4px' }}>
             SYS://DOCS_v1.0 · MODULE_COUNT: {docSections.length} · FAQ_COUNT: {faqs.length}
           </div>

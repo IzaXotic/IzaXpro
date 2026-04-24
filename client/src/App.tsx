@@ -63,12 +63,12 @@ function App() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
             <img
               src="/logo.png"
-              alt="IzaXotic"
+              alt="IzaXpro"
               style={{ width: 52, height: 52, objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 0 10px rgba(124,58,237,0.5))' }}
             />
             <div>
               <h1 style={{ letterSpacing: '-0.5px', whiteSpace: 'nowrap', margin: 0, lineHeight: 1.1, fontSize: 24 }}>
-                <span style={{ color: 'white' }}>Iza</span><span style={{ color: '#a78bfa' }}>Xotic</span>
+                <span style={{ color: 'white' }}>Iza</span><span style={{ color: '#a78bfa' }}>Xpro</span>
               </h1>
               <span style={{ display: 'block', fontSize: 9, color: 'rgba(255,255,255,0.35)', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.6px', marginTop: 3 }}>BUSINESS SUITE</span>
             </div>
@@ -90,7 +90,7 @@ function App() {
           <div style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: '8px', padding: '12px 14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4, color: '#c4b5fd', fontWeight: 800, fontSize: 13, letterSpacing: '-0.3px' }}>
               <img src="/logo.png" alt="" style={{ width: 20, height: 20, objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(124,58,237,0.6))' }} />
-              IzaXotic
+              IzaXpro
             </div>
             <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.3px' }}>SYS://STUDIO · INDIA · REMOTE</span>
           </div>

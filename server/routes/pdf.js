@@ -11,7 +11,7 @@ const COMPANY = {
   address: 'Remote-First, India — Serving Clients Worldwide',
   phone: '+91 98765 43210',
   email: 'hello@izaxotic.com',
-  website: 'izaxotic-prototype.netlify.app',
+  website: 'izaxotic.com',
   gstin: 'GSTIN: Add Your GSTIN Here',
   bankName: 'Add Your Bank',
   accountNo: 'Add Account No.',
@@ -154,7 +154,7 @@ const buildInvoiceHTML = (doc, type = 'INVOICE') => `
     <div class="footer-left">
       Thank you for choosing IzaXotic!<br>
       Your vision, engineered into reality.<br>
-      <span class="watermark">SYS://GENERATED · IzaXotic Business Suite · ${new Date().getFullYear()}</span>
+      <span class="watermark">SYS://GENERATED · IzaXpro · ${new Date().getFullYear()}</span>
     </div>
     <div class="footer-right">
       Authorized Signatory<br>
