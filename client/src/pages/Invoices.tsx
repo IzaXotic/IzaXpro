@@ -120,20 +120,22 @@ export default function Invoices() {
           description: item.description || '',
           serviceType: item.serviceType || '',
           quantity:    Number(item.quantity)  || 1,
-          unitPrice:   Number(item.unitPrice ?? item.rate ?? 0),
+          unitPrice:   Number(item.unitPrice) || Number(item.rate) || Number(item.amount) || 0,
         })),
       };
-      // Recalculate totals from items
-      const subtotal    = enriched.items.reduce((s: number, i: any) => s + i.quantity * i.unitPrice, 0);
-      const discountAmt = Number(enriched.discountAmt ?? enriched.discount ?? 0);
-      const taxAmount   = Number(enriched.taxAmount   ?? 0);
+      // Recalculate totals from items (always fresh — don't use stale stored values)
+      const subtotal    = enriched.items.reduce((s: number, i: any) => s + (Number(i.quantity) || 1) * (Number(i.unitPrice) || 0), 0);
+      const discountAmt = Math.min(Number(enriched.discount) || Number(enriched.discountAmt) || 0, subtotal);
+      const taxRate     = Number(enriched.taxRate) || 0;
+      const taxAmount   = Math.round(((subtotal - discountAmt) * taxRate) / 100);
       const total       = subtotal - discountAmt + taxAmount;
-      enriched.subtotal    = subtotal    || enriched.subtotal    || 0;
-      enriched.discountAmt = discountAmt || enriched.discountAmt || 0;
-      enriched.taxAmount   = taxAmount   || enriched.taxAmount   || 0;
-      enriched.total       = total       || enriched.total       || 0;
+      enriched.subtotal    = subtotal;
+      enriched.discountAmt = discountAmt;
+      enriched.taxRate     = taxRate;
+      enriched.taxAmount   = taxAmount;
+      enriched.total       = total;
 
-      const fmt2 = (n: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n || 0);
+      const fmt2 = (n: number) => '\u20B9' + (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       const fmtDate = (d: any) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
       const items = enriched.items.map((item: any, i: number) => `
         <tr style="background:${i % 2 === 0 ? '#fff' : '#fafafa'}">
@@ -310,7 +312,7 @@ export default function Invoices() {
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowModal(false)}>
           <div className="modal modal-xl">
             <div className="modal-header">
-              <span className="modal-title">{editing ? `Edit Invoice #${editing.number}` : 'New Invoice'}</span>
+              <span className="modal-title">{editing ? `Edit Invoice #${editing.number || `INV-${(editing.id || '').slice(0, 8).toUpperCase()}`}` : 'New Invoice'}</span>
               <button className="btn btn-ghost btn-sm" onClick={() => setShowModal(false)}>✕</button>
             </div>
             <form onSubmit={handleSubmit}>
