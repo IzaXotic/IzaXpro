@@ -224,8 +224,25 @@ export default function Projects() {
                     </select>
                   </div>
                   <div className="form-group">
-                    <FieldLabel label={`Progress (${form.progress}%)`} tip="Drag to update overall project completion. Reflected in the progress bar on the project card." />
-                    <input type="range" min={0} max={100} className="form-control" style={{ padding: '6px 0' }} value={form.progress} onChange={e => setForm(f => ({ ...f, progress: Number(e.target.value) }))} />
+                    <FieldLabel label={`Progress (${form.progress}%)`} tip="Type a value OR drag the slider — both stay in sync." />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <input
+                        type="number" min={0} max={100} className="form-control"
+                        style={{ width: 72, flexShrink: 0, textAlign: 'center', MozAppearance: 'textfield' } as any}
+                        value={form.progress}
+                        onChange={e => {
+                          const v = Math.min(100, Math.max(0, Number(e.target.value) || 0));
+                          setForm(f => ({ ...f, progress: v }));
+                        }}
+                      />
+                      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>%</span>
+                      <input
+                        type="range" min={0} max={100}
+                        style={{ flex: 1, accentColor: '#7c3aed', cursor: 'pointer' }}
+                        value={form.progress}
+                        onChange={e => setForm(f => ({ ...f, progress: Number(e.target.value) }))}
+                      />
+                    </div>
                   </div>
                   <div className="form-group" style={{ gridColumn: '1/-1' }}>
                     <FieldLabel label="Description" tip="Internal notes about the project scope, goals, or technical requirements." />

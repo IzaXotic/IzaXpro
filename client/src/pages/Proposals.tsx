@@ -341,15 +341,49 @@ export default function Proposals() {
                                 />
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                                   <input
-                                    type="number" min={0} max={100} className="form-input"
-                                    style={{ padding: '5px 8px', fontSize: 13, textAlign: 'center' }}
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    className="form-input"
+                                    style={{ padding: '5px 8px', fontSize: 13, textAlign: 'center', width: '100%' }}
                                     value={split.percent}
                                     onChange={e => {
-                                      const sp = [...splits]; sp[idx] = { ...sp[idx], percent: Number(e.target.value) };
+                                      const raw = e.target.value.replace(/[^0-9]/g, '');
+                                      const newPct = Math.min(100, Number(raw) || 0);
+                                      const sp = [...splits];
+                                      sp[idx] = { ...sp[idx], percent: newPct };
+                                      // Auto-distribute leftover across OTHER splits
+                                      const others = sp.filter((_: any, i: number) => i !== idx);
+                                      const leftover = Math.max(0, 100 - newPct);
+                                      const oldOtherTotal = others.reduce((s: number, x: any) => s + (Number(x.percent) || 0), 0);
+                                      if (others.length > 0 && oldOtherTotal > 0) {
+                                        // Scale other splits proportionally
+                                        let distributed = 0;
+                                        others.forEach((o: any, i: number) => {
+                                          const ratio = (Number(o.percent) || 0) / oldOtherTotal;
+                                          const share = i === others.length - 1
+                                            ? leftover - distributed
+                                            : Math.round(leftover * ratio);
+                                          distributed += share;
+                                          const realIdx = sp.findIndex((x: any, xi: number) => xi !== idx && x === splits[sp.indexOf(x)]);
+                                          // find real index
+                                          let count = -1;
+                                          for (let j = 0; j < sp.length; j++) {
+                                            if (j !== idx) { count++; if (count === i) { sp[j] = { ...sp[j], percent: share }; break; } }
+                                          }
+                                        });
+                                      } else if (others.length > 0 && oldOtherTotal === 0) {
+                                        // Distribute evenly
+                                        const share = Math.floor(leftover / others.length);
+                                        let count = -1;
+                                        for (let j = 0; j < sp.length; j++) {
+                                          if (j !== idx) { count++; sp[j] = { ...sp[j], percent: count === others.length - 1 ? leftover - share * count : share }; }
+                                        }
+                                      }
                                       setForm((f: any) => ({ ...f, paymentSplits: sp }));
                                     }}
                                   />
-                                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>%</span>
+                                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>%</span>
                                 </div>
                                 <div style={{ textAlign: 'right', fontWeight: 700, fontSize: 14, color: '#a78bfa' }}>
                                   {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amt)}

@@ -503,6 +503,32 @@ code { font-family: 'JetBrains Mono', monospace; }
 .recharts-pie-label-text { font-family: 'JetBrains Mono', monospace !important; font-size: 10px !important; fill: rgba(255,255,255,0.7) !important; }
 
 /* ══════════════════════════════════════════
+   HIDE NUMBER INPUT SPINNERS (arrows)
+══════════════════════════════════════════ */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+/* Range slider style */
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  height: 4px; border-radius: 99px;
+  background: rgba(255,255,255,0.1); outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #7c3aed; cursor: pointer;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.25);
+  transition: box-shadow 0.15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 5px rgba(124,58,237,0.35); }
+input[type=range]::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #7c3aed; cursor: pointer; border: none;
+}
+
+/* ══════════════════════════════════════════
    SCROLLABLE MODAL FIX
 ══════════════════════════════════════════ */
 body.modal-open { overflow: hidden; }
