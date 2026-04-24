@@ -46,7 +46,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     if (useMongo()) {
-      const doc = await Project.findOneAndUpdate({ id: req.params.id }, req.body, { new: true }).lean();
+      const doc = await Project.findOneAndUpdate({ id: req.params.id }, req.body, { returnDocument: 'after' }).lean();
       if (!doc) return res.status(404).json({ error: 'Project not found' });
       return res.json(doc);
     }

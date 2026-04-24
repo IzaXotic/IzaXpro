@@ -53,7 +53,7 @@ router.put('/:id', async (req, res) => {
       if (!existing) return res.status(404).json({ error: 'Quotation not found' });
       const { items = existing.items, taxRate = existing.taxRate, discount = existing.discount } = req.body;
       const totals = calculateTotals(items, taxRate, discount);
-      const doc = await Quotation.findOneAndUpdate({ id: req.params.id }, { ...req.body, ...totals }, { new: true }).lean();
+      const doc = await Quotation.findOneAndUpdate({ id: req.params.id }, { ...req.body, ...totals }, { returnDocument: 'after' }).lean();
       return res.json(doc);
     }
     const quotations = readData('quotations');

@@ -99,10 +99,15 @@ export default function Clients() {
                   </td>
                   <td>{c.company || '-'}</td>
                   <td>
-                    {(c.services || []).slice(0, 2).map((s: string) => (
-                      <span key={s} style={{ display: 'inline-block', background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600, marginRight: 3 }}>{s}</span>
-                    ))}
-                    {(c.services || []).length > 2 && <span style={{ fontSize: 11, color: 'var(--gray-400)' }}>+{(c.services || []).length - 2}</span>}
+                    {(c.services || []).length === 0
+                      ? <span style={{ color: 'var(--gray-300)', fontSize: 12 }}>—</span>
+                      : <>
+                        {(c.services || []).slice(0, 2).map((s: string) => (
+                          <span key={s} style={{ display: 'inline-block', background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600, marginRight: 3 }}>{s}</span>
+                        ))}
+                        {(c.services || []).length > 2 && <span style={{ fontSize: 11, color: 'var(--gray-400)' }}>+{(c.services || []).length - 2}</span>}
+                      </>
+                    }
                   </td>
                   <td>{c.budget ? `₹${Number(c.budget).toLocaleString('en-IN')}` : '-'}</td>
                   <td><span className={`badge badge-${(c.status || 'new').toLowerCase().replace(' ', '')}`}>{c.status}</span></td>
@@ -151,17 +156,43 @@ export default function Clients() {
                   <input className="form-control" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="City, State, PIN" />
                 </div>
                 <div className="form-group">
-                  <FieldLabel label="Services Required" tip="Toggle all services this client is interested in. Used for filtering and proposal scoping." />
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
-                    {SERVICES.map(s => (
-                      <button type="button" key={s} onClick={() => toggleService(s)} style={{
-                        padding: '5px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1.5px solid',
-                        background: form.services.includes(s) ? 'var(--primary)' : 'transparent',
-                        color: form.services.includes(s) ? 'white' : 'var(--gray-500)',
-                        borderColor: form.services.includes(s) ? 'var(--primary)' : 'var(--gray-200)'
-                      }}>{s}</button>
-                    ))}
-                  </div>
+                  <FieldLabel label="Services Required" tip="Select all services this client needs. Only chosen services will appear on their profile." />
+                  {/* Selected */}
+                  {form.services.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 8 }}>
+                      {form.services.map(s => (
+                        <button type="button" key={s} onClick={() => toggleService(s)} style={{
+                          padding: '5px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                          background: 'var(--primary)', color: 'white', border: '1.5px solid var(--primary)',
+                          display: 'flex', alignItems: 'center', gap: 5
+                        }}>
+                          {s} <span style={{ opacity: 0.75, fontSize: 14, lineHeight: 1 }}>×</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {/* Available (unselected) */}
+                  {SERVICES.filter(s => !form.services.includes(s)).length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 11, color: 'var(--gray-400)', marginBottom: 5 }}>
+                        {form.services.length === 0 ? 'Click to select:' : 'Add more:'}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+                        {SERVICES.filter(s => !form.services.includes(s)).map(s => (
+                          <button type="button" key={s} onClick={() => toggleService(s)} style={{
+                            padding: '5px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                            background: 'transparent', color: 'var(--gray-500)',
+                            border: '1.5px dashed var(--gray-200)'
+                          }}>{s}</button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {SERVICES.length === 0 && (
+                    <p style={{ fontSize: 12, color: 'var(--gray-400)', margin: '4px 0 0' }}>
+                      No services configured — add them in <strong>Settings → Clients & Services</strong>.
+                    </p>
+                  )}
                 </div>
                 <div className="grid-2">
                   <div className="form-group">

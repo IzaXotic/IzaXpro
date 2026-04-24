@@ -33,7 +33,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     if (useMongo()) {
-      const doc = await Milestone.findOneAndUpdate({ id: req.params.id }, req.body, { new: true }).lean();
+      const doc = await Milestone.findOneAndUpdate({ id: req.params.id }, req.body, { returnDocument: 'after' }).lean();
       if (!doc) return res.status(404).json({ error: 'Milestone not found' });
       // Auto-update project progress
       if (doc.projectId) {
