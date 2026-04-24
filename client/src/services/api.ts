@@ -59,7 +59,7 @@ export const supportAPI = {
 };
 
 export const dashboardAPI = {
-  get: () => API.get('/dashboard')
+  get: (from?: string, to?: string) => API.get('/dashboard', { params: { ...(from ? { from } : {}), ...(to ? { to } : {}) } })
 };
 
 export const pdfAPI = {

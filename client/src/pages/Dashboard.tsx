@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Users, FolderKanban, FileText, TrendingUp,
-  DollarSign, AlertCircle, CheckCircle, Clock
+  DollarSign, AlertCircle, CheckCircle, Clock, Calendar
 } from 'lucide-react';
 import { dashboardAPI } from '../services/api';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
@@ -11,34 +11,76 @@ const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444'];
 const fmt = (n: number) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
 
+// ── preset periods ──────────────────────────────────────────────────────────
+const today = () => new Date();
+const ymd = (d: Date) => d.toISOString().split('T')[0];
+
+const PRESETS: { label: string; from: () => string; to: () => string }[] = [
+  {
+    label: 'This Month',
+    from: () => { const d = today(); return ymd(new Date(d.getFullYear(), d.getMonth(), 1)); },
+    to:   () => ymd(today()),
+  },
+  {
+    label: 'Last Month',
+    from: () => { const d = today(); return ymd(new Date(d.getFullYear(), d.getMonth() - 1, 1)); },
+    to:   () => { const d = today(); return ymd(new Date(d.getFullYear(), d.getMonth(), 0)); },
+  },
+  {
+    label: 'This Quarter',
+    from: () => { const d = today(); const q = Math.floor(d.getMonth() / 3); return ymd(new Date(d.getFullYear(), q * 3, 1)); },
+    to:   () => ymd(today()),
+  },
+  {
+    label: 'This Year',
+    from: () => ymd(new Date(today().getFullYear(), 0, 1)),
+    to:   () => ymd(today()),
+  },
+  { label: 'All Time', from: () => '', to: () => '' },
+];
+
 export default function Dashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [preset, setPreset] = useState('All Time');
+  const [from, setFrom] = useState('');
+  const [to,   setTo]   = useState('');
 
-  useEffect(() => {
-    dashboardAPI.get().then(r => { setData(r.data); setLoading(false); }).catch(() => setLoading(false));
+  const load = useCallback(async (f: string, t: string) => {
+    setLoading(true);
+    try {
+      const r = await dashboardAPI.get(f || undefined, t || undefined);
+      setData(r.data);
+    } catch { /* silent */ }
+    finally { setLoading(false); }
   }, []);
 
-  if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
-      <div style={{ textAlign: 'center', color: 'var(--gray-400)' }}>
-        <div style={{ fontSize: 32, marginBottom: 12 }}>⚡</div>
-        <div>Loading dashboard...</div>
-      </div>
-    </div>
-  );
+  // initial load — All Time
+  useEffect(() => { load('', ''); }, [load]);
+
+  const applyPreset = (label: string) => {
+    const p = PRESETS.find(x => x.label === label)!;
+    const f = p.from(); const t = p.to();
+    setPreset(label); setFrom(f); setTo(t);
+    load(f, t);
+  };
+
+  const applyCustom = () => {
+    setPreset('Custom');
+    load(from, to);
+  };
 
   const stats = data?.stats || {};
 
   const statCards = [
-    { label: 'Total Clients', value: stats.totalClients || 0, icon: <Users size={20} />, color: '#6366f1', bg: '#e0e7ff' },
-    { label: 'Active Projects', value: stats.activeProjects || 0, icon: <FolderKanban size={20} />, color: '#10b981', bg: '#d1fae5' },
-    { label: 'Total Revenue', value: fmt(stats.totalRevenue), icon: <DollarSign size={20} />, color: '#8b5cf6', bg: '#ede9fe', big: true },
-    { label: 'Pending Amount', value: fmt(stats.pendingRevenue), icon: <Clock size={20} />, color: '#f59e0b', bg: '#fef3c7', big: true },
-    { label: 'Total Invoices', value: stats.totalInvoices || 0, icon: <FileText size={20} />, color: '#3b82f6', bg: '#dbeafe' },
-    { label: 'Paid Invoices', value: stats.paidInvoices || 0, icon: <CheckCircle size={20} />, color: '#10b981', bg: '#d1fae5' },
-    { label: 'Overdue', value: stats.overdueInvoices || 0, icon: <AlertCircle size={20} />, color: '#ef4444', bg: '#fee2e2' },
-    { label: 'Open Tickets', value: stats.openTickets || 0, icon: <TrendingUp size={20} />, color: '#f59e0b', bg: '#fef3c7' },
+    { label: 'Total Clients',  value: stats.totalClients  || 0, icon: <Users size={20} />,       color: '#6366f1', bg: '#e0e7ff' },
+    { label: 'Active Projects',value: stats.activeProjects|| 0, icon: <FolderKanban size={20} />,color: '#10b981', bg: '#d1fae5' },
+    { label: 'Total Revenue',  value: fmt(stats.totalRevenue),  icon: <DollarSign size={20} />,  color: '#8b5cf6', bg: '#ede9fe', big: true },
+    { label: 'Pending Amount', value: fmt(stats.pendingRevenue),icon: <Clock size={20} />,        color: '#f59e0b', bg: '#fef3c7', big: true },
+    { label: 'Total Invoices', value: stats.totalInvoices  || 0,icon: <FileText size={20} />,    color: '#3b82f6', bg: '#dbeafe' },
+    { label: 'Paid Invoices',  value: stats.paidInvoices   || 0,icon: <CheckCircle size={20} />, color: '#10b981', bg: '#d1fae5' },
+    { label: 'Overdue',        value: stats.overdueInvoices|| 0,icon: <AlertCircle size={20} />, color: '#ef4444', bg: '#fee2e2' },
+    { label: 'Open Tickets',   value: stats.openTickets    || 0,icon: <TrendingUp size={20} />,  color: '#f59e0b', bg: '#fef3c7' },
   ];
 
   return (
@@ -46,27 +88,58 @@ export default function Dashboard() {
       {/* Welcome Banner */}
       <div style={{
         background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-        borderRadius: 16, padding: '28px 32px', marginBottom: 28, color: 'white',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+        borderRadius: 16, padding: '24px 32px', marginBottom: 20, color: 'white',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12
       }}>
         <div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 6 }}>Welcome back! 👋</h2>
-          <p style={{ opacity: 0.85, fontSize: 14 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>Welcome back! 👋</h2>
+          <p style={{ opacity: 0.85, fontSize: 14, margin: 0 }}>
             IzaXotic · Custom Web Development & UI/UX Design Studio
           </p>
         </div>
         <div style={{ textAlign: 'right', opacity: 0.9 }}>
-          <div style={{ fontSize: 12 }}>Today</div>
-          <div style={{ fontSize: 20, fontWeight: 700 }}>{new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+          <div style={{ fontSize: 11 }}>Today</div>
+          <div style={{ fontSize: 18, fontWeight: 700 }}>{new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+        </div>
+      </div>
+
+      {/* ── Date Filter Bar ── */}
+      <div className="card" style={{ padding: '12px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+        <Calendar size={15} color="var(--primary)" />
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', marginRight: 4 }}>Period:</span>
+
+        {/* Preset buttons */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {PRESETS.map(p => (
+            <button key={p.label} onClick={() => applyPreset(p.label)} style={{
+              padding: '5px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1.5px solid',
+              background: preset === p.label ? 'var(--primary)' : 'transparent',
+              color:      preset === p.label ? 'white' : 'var(--gray-500)',
+              borderColor:preset === p.label ? 'var(--primary)' : 'var(--gray-200)',
+            }}>{p.label}</button>
+          ))}
+        </div>
+
+        {/* Custom date pickers */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto', flexWrap: 'wrap' }}>
+          <input type="date" className="form-control" style={{ height: 32, fontSize: 12, width: 140 }}
+            value={from} onChange={e => { setFrom(e.target.value); setPreset('Custom'); }} />
+          <span style={{ fontSize: 12, color: 'var(--gray-400)' }}>to</span>
+          <input type="date" className="form-control" style={{ height: 32, fontSize: 12, width: 140 }}
+            value={to} onChange={e => { setTo(e.target.value); setPreset('Custom'); }} />
+          <button className="btn btn-primary" onClick={applyCustom}
+            style={{ height: 32, padding: '0 14px', fontSize: 12 }}>
+            Apply
+          </button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="stats-grid">
+      <div className="stats-grid" style={{ opacity: loading ? 0.5 : 1, transition: 'opacity 0.2s' }}>
         {statCards.map((s, i) => (
           <div className="stat-card" key={i}>
             <div>
-              <div className="stat-card-value" style={{ fontSize: s.big ? 20 : 28 }}>{s.value}</div>
+              <div className="stat-card-value" style={{ fontSize: (s as any).big ? 20 : 28 }}>{s.value}</div>
               <div className="stat-card-label">{s.label}</div>
             </div>
             <div className="stat-icon" style={{ background: s.bg, color: s.color }}>{s.icon}</div>
