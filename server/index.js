@@ -10,9 +10,6 @@ const connectDB = require('./db');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Connect to MongoDB if URI is set (non-blocking, falls back to JSON)
-connectDB();
-
 // Ensure data directory exists
 fs.ensureDirSync(path.join(__dirname, 'data'));
 fs.ensureDirSync(path.join(__dirname, 'data/pdfs'));
@@ -64,4 +61,10 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+// Connect to MongoDB FIRST, then start server
+connectDB().then(() => {
+  app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+}).catch(err => {
+  console.error('Failed to start server:', err.message);
+  process.exit(1);
+});
