@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, FileCheck, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { proposalsAPI, clientsAPI, pdfAPI } from '../services/api';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { proposalsAPI, clientsAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
 import DatePicker from '../components/DatePicker';
 import { useConfig } from '../hooks/useConfig';
@@ -100,13 +102,96 @@ export default function Proposals() {
     catch { toast.error('Failed to delete'); }
   };
 
-  const generatePDF = async (id: string) => {
-    setGenLoading(id);
+  const generatePDF = async (prop: any) => {
+    setGenLoading(prop.id);
     try {
-      const r = await pdfAPI.generateProposal(id);
-      const baseUrl = process.env.NODE_ENV === 'production' ? window.location.origin : 'http://localhost:5001';
-      window.open(`${baseUrl}${r.data.url}`, '_blank');
-      toast.success('Proposal PDF generated!');
+      const client = clients.find((c: any) => c.id === prop.clientId);
+      const p: any = {
+        ...prop,
+        clientName:    prop.clientName    || client?.name    || '—',
+        clientCompany: prop.clientCompany || client?.company || '',
+        number: prop.number || `PRO-${prop.id?.slice(0, 8).toUpperCase()}`,
+      };
+      const fmtAmt = (n: number) => 'Rs.' + (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      const fmtDate = (d: any) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+
+      const phases = (p.phases || []).map((ph: any) => `
+        <div style="display:flex;gap:20px;margin-bottom:14px;padding:14px;background:#f8f9ff;border-radius:8px;border-left:4px solid #6366f1">
+          <div style="font-weight:700;color:#6366f1;font-size:13px;min-width:140px;flex-shrink:0">${ph.name || ''}</div>
+          <div style="font-size:12px;color:#555;line-height:1.6">${ph.description || ''}<br><span style="font-weight:700">Duration:</span> ${ph.duration || ''}</div>
+        </div>`).join('');
+
+      const techTags = (p.technologies || []).map((t: string) =>
+        `<span style="display:inline-block;background:#e0e7ff;color:#4338ca;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;margin:3px">${t}</span>`).join('');
+
+      const paymentSplits = (p.paymentSplits || []).map((s: any) => {
+        const amt = Math.round(((p.investmentAmount || 0) * s.percent) / 100);
+        return `<div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid #e0e7ff">
+          <span>${s.label}</span><span style="font-weight:700">${s.percent}% — ${fmtAmt(amt)}</span>
+        </div>`;
+      }).join('');
+
+      const statusColor = p.status === 'Accepted' ? '#d1fae5' : p.status === 'Rejected' ? '#fee2e2' : p.status === 'Sent' ? '#dbeafe' : '#f1f5f9';
+      const statusText  = p.status === 'Accepted' ? '#065f46' : p.status === 'Rejected' ? '#991b1b' : p.status === 'Sent' ? '#1e40af' : '#334155';
+
+      const html = `<div style="font-family:Arial,Helvetica,sans-serif;color:#0f0f0f;background:#fff;padding:40px;width:780px;box-sizing:border-box">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:24px;border-bottom:3px solid #0f0f0f;margin-bottom:28px">
+          <div>
+            <div style="font-size:26px;font-weight:900;letter-spacing:-1px">Iza<span style="color:#7c3aed">Xotic</span></div>
+            <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin-top:4px">Custom Web Development &amp; UI/UX Design Studio</div>
+            <div style="font-size:11px;color:#555;margin-top:8px;line-height:1.7">Remote-First, India<br>hello@izaxotic.com</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:28px;font-weight:900;letter-spacing:3px;text-transform:uppercase">Proposal</div>
+            <div style="font-size:12px;color:#888;font-family:monospace;margin-top:4px">#${p.number}</div>
+            <div style="margin-top:8px"><span style="background:${statusColor};color:${statusText};padding:3px 12px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase">${p.status || 'Draft'}</span></div>
+          </div>
+        </div>
+
+        <div style="text-align:center;padding:40px 30px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border-radius:12px;margin-bottom:28px">
+          <div style="font-size:28px;font-weight:900;margin-bottom:10px">${p.title || 'Project Proposal'}</div>
+          <div style="font-size:13px;opacity:0.9">Prepared for: <span style="font-weight:700">${p.clientName}${p.clientCompany ? ' — ' + p.clientCompany : ''}</span></div>
+          <div style="font-size:12px;opacity:0.8;margin-top:6px">Date: ${fmtDate(p.createdAt)} &nbsp;|&nbsp; Valid Until: ${fmtDate(p.validUntil)}</div>
+        </div>
+
+        ${p.overview ? `<div style="margin-bottom:24px"><div style="font-size:16px;font-weight:700;color:#6366f1;border-bottom:2px solid #e0e7ff;padding-bottom:8px;margin-bottom:12px">Project Overview</div><p style="font-size:13px;line-height:1.8;color:#444">${p.overview}</p></div>` : ''}
+        ${p.scope    ? `<div style="margin-bottom:24px"><div style="font-size:16px;font-weight:700;color:#6366f1;border-bottom:2px solid #e0e7ff;padding-bottom:8px;margin-bottom:12px">Scope of Work</div><p style="font-size:13px;line-height:1.8;color:#444">${p.scope}</p></div>` : ''}
+
+        ${phases ? `<div style="margin-bottom:24px"><div style="font-size:16px;font-weight:700;color:#6366f1;border-bottom:2px solid #e0e7ff;padding-bottom:8px;margin-bottom:12px">Project Timeline &amp; Phases</div>${phases}</div>` : ''}
+        ${techTags ? `<div style="margin-bottom:24px"><div style="font-size:16px;font-weight:700;color:#6366f1;border-bottom:2px solid #e0e7ff;padding-bottom:8px;margin-bottom:12px">Technologies &amp; Stack</div><div>${techTags}</div></div>` : ''}
+
+        ${p.investmentAmount ? `<div style="margin-bottom:24px">
+          <div style="font-size:16px;font-weight:700;color:#6366f1;border-bottom:2px solid #e0e7ff;padding-bottom:8px;margin-bottom:12px">Investment</div>
+          <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border-radius:12px;padding:24px;text-align:center;margin-bottom:16px">
+            <div style="font-size:13px;opacity:0.85">Total Project Investment</div>
+            <div style="font-size:40px;font-weight:900;margin:8px 0">${fmtAmt(p.investmentAmount)}</div>
+            ${p.paymentSchedule ? `<div style="font-size:13px;opacity:0.85">${p.paymentSchedule}</div>` : ''}
+          </div>
+          ${paymentSplits ? `<div style="border:1px solid #e0e7ff;border-radius:8px;padding:16px">${paymentSplits}</div>` : ''}
+        </div>` : ''}
+
+        ${p.deliverables ? `<div style="margin-bottom:24px"><div style="font-size:16px;font-weight:700;color:#6366f1;border-bottom:2px solid #e0e7ff;padding-bottom:8px;margin-bottom:12px">Deliverables</div><p style="font-size:13px;line-height:1.8;color:#444">${p.deliverables}</p></div>` : ''}
+        ${p.terms       ? `<div style="margin-bottom:24px"><div style="font-size:16px;font-weight:700;color:#6366f1;border-bottom:2px solid #e0e7ff;padding-bottom:8px;margin-bottom:12px">Terms &amp; Conditions</div><p style="font-size:13px;line-height:1.8;color:#444">${p.terms}</p></div>` : ''}
+
+        <div style="margin-top:40px;padding-top:16px;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;font-size:11px;color:#888">
+          <div>Prepared by IzaXotic<br><span style="font-family:monospace;font-size:9px;color:#ccc;letter-spacing:0.5px">SYS://CONFIDENTIAL - Your vision, engineered into reality</span></div>
+          <div style="text-align:right">Authorized Signatory<br><span style="font-weight:900;color:#0f0f0f">IzaXotic</span></div>
+        </div>
+      </div>`;
+
+      const container = document.createElement('div');
+      container.style.cssText = 'position:absolute;top:0;left:0;visibility:hidden;pointer-events:none;z-index:-1';
+      container.innerHTML = html;
+      document.body.appendChild(container);
+      const canvas = await html2canvas(container.firstChild as HTMLElement, { scale: 2, useCORS: true, backgroundColor: '#fff' });
+      document.body.removeChild(container);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const w = pdf.internal.pageSize.getWidth();
+      const h = (canvas.height * w) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, w, h);
+      pdf.save(`proposal-${p.number || p.id}.pdf`);
+      toast.success('PDF downloaded!');
     } catch { toast.error('PDF generation failed.'); }
     finally { setGenLoading(null); }
   };
@@ -147,7 +232,7 @@ export default function Proposals() {
                   <td>
                     <div style={{ display: 'flex', gap: 5 }}>
                       <button className="btn btn-ghost btn-xs" onClick={() => openEdit(p)}><Pencil size={12} /></button>
-                      <button className="btn btn-ghost btn-xs" style={{ color: 'var(--success)' }} onClick={() => generatePDF(p.id)} disabled={genLoading === p.id}>
+                      <button className="btn btn-ghost btn-xs" style={{ color: 'var(--success)' }} onClick={() => generatePDF(p)} disabled={genLoading === p.id}>
                         {genLoading === p.id ? '...' : <Download size={12} />}
                       </button>
                       <button className="btn btn-xs" style={{ background: '#fee2e2', color: '#ef4444' }} onClick={() => handleDelete(p.id)}><Trash2 size={12} /></button>
