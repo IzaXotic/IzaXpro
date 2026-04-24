@@ -43,7 +43,17 @@ export default function Projects() {
   const clientName = (id: string) => clients.find(c => c.id === id)?.name || '-';
 
   const openCreate = () => { setEditing(null); setForm(emptyForm); setShowModal(true); };
-  const openEdit = (p: Project) => { setEditing(p); setForm({ ...emptyForm, ...p, budget: String(p.budget ?? ''), estimatedHours: String(p.estimatedHours ?? '') }); setShowModal(true); };
+  const openEdit = (p: Project) => {
+    setEditing(p);
+    setForm({
+      ...emptyForm, ...p,
+      budget: String(p.budget ?? ''),
+      estimatedHours: String(p.estimatedHours ?? ''),
+      startDate: p.startDate?.split('T')[0] || '',
+      deadline:  p.deadline?.split('T')[0]  || '',
+    });
+    setShowModal(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -205,11 +215,11 @@ export default function Projects() {
                   </div>
                   <div className="form-group">
                     <FieldLabel label="Start Date" tip="Planned kickoff date. Informational — does not trigger any automation." />
-                    <input type="date" className="form-control" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} />
+                    <input type="date" className="form-control" value={form.startDate?.split('T')[0] || ''} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} />
                   </div>
                   <div className="form-group">
                     <FieldLabel label="Deadline" tip="Final delivery date. Shown in the project card and used for overdue tracking." />
-                    <input type="date" className="form-control" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} />
+                    <input type="date" className="form-control" value={form.deadline?.split('T')[0] || ''} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} />
                   </div>
                   <div className="form-group">
                     <FieldLabel label="Budget (₹)" tip="Estimated budget for reference. Does not auto-generate invoices — raise invoices separately." />
@@ -282,7 +292,7 @@ export default function Projects() {
                 <div className="grid-2">
                   <div className="form-group">
                     <label className="form-label">Due Date</label>
-                    <input type="date" className="form-control" value={msForm.dueDate} onChange={e => setMsForm((f: any) => ({ ...f, dueDate: e.target.value }))} />
+                    <input type="date" className="form-control" value={msForm.dueDate?.split('T')[0] || ''} onChange={e => setMsForm((f: any) => ({ ...f, dueDate: e.target.value }))} />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Status</label>
