@@ -22,7 +22,7 @@ dataFiles.forEach(file => {
 });
 
 // Middleware
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(cors({
   origin: process.env.CLIENT_URL
     ? [process.env.CLIENT_URL, 'http://localhost:3000', 'http://localhost:3001']
@@ -34,9 +34,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/pdfs', express.static(path.join(__dirname, 'data/pdfs')));
 
-// Serve React build in production
+// Serve React static files BEFORE API routes so /static/js/... is handled correctly
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  const buildPath = path.resolve(__dirname, '../client/build');
+  app.use(express.static(buildPath, { index: false }));
 }
 
 // Routes
@@ -56,8 +57,9 @@ app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Dat
 
 // Catch-all: serve React app for any non-API route (in production)
 if (process.env.NODE_ENV === 'production') {
+  const buildPath = path.resolve(__dirname, '../client/build');
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+    res.sendFile(path.join(buildPath, 'index.html'));
   });
 }
 
