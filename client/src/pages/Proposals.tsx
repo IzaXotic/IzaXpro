@@ -349,37 +349,8 @@ export default function Proposals() {
                                     value={split.percent}
                                     onChange={e => {
                                       const raw = e.target.value.replace(/[^0-9]/g, '');
-                                      const newPct = Math.min(100, Number(raw) || 0);
                                       const sp = [...splits];
-                                      sp[idx] = { ...sp[idx], percent: newPct };
-                                      // Auto-distribute leftover across OTHER splits
-                                      const others = sp.filter((_: any, i: number) => i !== idx);
-                                      const leftover = Math.max(0, 100 - newPct);
-                                      const oldOtherTotal = others.reduce((s: number, x: any) => s + (Number(x.percent) || 0), 0);
-                                      if (others.length > 0 && oldOtherTotal > 0) {
-                                        // Scale other splits proportionally
-                                        let distributed = 0;
-                                        others.forEach((o: any, i: number) => {
-                                          const ratio = (Number(o.percent) || 0) / oldOtherTotal;
-                                          const share = i === others.length - 1
-                                            ? leftover - distributed
-                                            : Math.round(leftover * ratio);
-                                          distributed += share;
-                                          const realIdx = sp.findIndex((x: any, xi: number) => xi !== idx && x === splits[sp.indexOf(x)]);
-                                          // find real index
-                                          let count = -1;
-                                          for (let j = 0; j < sp.length; j++) {
-                                            if (j !== idx) { count++; if (count === i) { sp[j] = { ...sp[j], percent: share }; break; } }
-                                          }
-                                        });
-                                      } else if (others.length > 0 && oldOtherTotal === 0) {
-                                        // Distribute evenly
-                                        const share = Math.floor(leftover / others.length);
-                                        let count = -1;
-                                        for (let j = 0; j < sp.length; j++) {
-                                          if (j !== idx) { count++; sp[j] = { ...sp[j], percent: count === others.length - 1 ? leftover - share * count : share }; }
-                                        }
-                                      }
+                                      sp[idx] = { ...sp[idx], percent: raw === '' ? '' : Math.min(100, Number(raw)) };
                                       setForm((f: any) => ({ ...f, paymentSplits: sp }));
                                     }}
                                   />
