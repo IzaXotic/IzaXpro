@@ -4,9 +4,13 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
 const fs = require('fs-extra');
+const connectDB = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+
+// Connect to MongoDB if URI is set (non-blocking, falls back to JSON)
+connectDB();
 
 // Ensure data directory exists
 fs.ensureDirSync(path.join(__dirname, 'data'));

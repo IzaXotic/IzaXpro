@@ -13,7 +13,7 @@
     "server": "cd server && npm start",
     "server:dev": "cd server && npm run dev",
     "client": "cd client && npm start",
-    "build": "cd client && npm install && npm run build",
+    "build": "cd server && npm install && cd ../client && npm install && npm run build",
     "render-build": "npm install && cd server && npm install && cd ../client && npm install && npm run build",
     "render-start": "cd server && node index.js",
     "install-deps": "npm install && cd server && npm install && cd ../client && npm install"

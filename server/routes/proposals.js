@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const { readData, writeData } = require('../utils/db');
+const mongoose = require('mongoose');
+const { Proposal } = require('../models');
+
+const useMongo = () => mongoose.connection.readyState === 1;
 
 const generateNumber = (prefix, list) => {
   const year = new Date().getFullYear();
@@ -9,20 +13,27 @@ const generateNumber = (prefix, list) => {
   return `${prefix}-${year}-${String(count).padStart(4, '0')}`;
 };
 
-router.get('/', (req, res) => {
-  try { res.json(readData('proposals')); } catch (err) { res.status(500).json({ error: err.message }); }
+router.get('/', async (req, res) => {
+  try {
+    if (useMongo()) return res.json(await Proposal.find().lean());
+    res.json(readData('proposals'));
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
+    if (useMongo()) {
+      const existing = await Proposal.find().lean();
+      const proposal = await Proposal.create({
+        id: uuidv4(), number: generateNumber('PRO', existing), ...req.body, status: 'Draft'
+      });
+      return res.status(201).json(proposal);
+    }
     const proposals = readData('proposals');
     const proposal = {
-      id: uuidv4(),
-      number: generateNumber('PRO', proposals),
-      ...req.body,
-      status: 'Draft',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      id: uuidv4(), number: generateNumber('PRO', proposals),
+      ...req.body, status: 'Draft',
+      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
     };
     proposals.push(proposal);
     writeData('proposals', proposals);
@@ -30,8 +41,13 @@ router.post('/', (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
+    if (useMongo()) {
+      const doc = await Proposal.findOneAndUpdate({ id: req.params.id }, req.body, { new: true }).lean();
+      if (!doc) return res.status(404).json({ error: 'Proposal not found' });
+      return res.json(doc);
+    }
     const proposals = readData('proposals');
     const idx = proposals.findIndex(p => p.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: 'Proposal not found' });
@@ -41,10 +57,13 @@ router.put('/:id', (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
-    let proposals = readData('proposals');
-    proposals = proposals.filter(p => p.id !== req.params.id);
+    if (useMongo()) {
+      await Proposal.deleteOne({ id: req.params.id });
+      return res.json({ message: 'Proposal deleted' });
+    }
+    const proposals = readData('proposals').filter(p => p.id !== req.params.id);
     writeData('proposals', proposals);
     res.json({ message: 'Proposal deleted' });
   } catch (err) { res.status(500).json({ error: err.message }); }
