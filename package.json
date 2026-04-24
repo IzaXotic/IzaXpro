@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "node app.js",
+    "postinstall": "cd server && npm install",
     "dev": "concurrently \"npm run server:dev\" \"npm run client\"",
     "server": "cd server && npm start",
     "server:dev": "cd server && npm run dev",
