@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');

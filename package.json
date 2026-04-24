@@ -19,10 +19,20 @@
     "render-start": "cd server && node index.js",
     "install-deps": "npm install && cd server && npm install && cd ../client && npm install"
   },
-  "keywords": ["business", "document", "generation", "invoice", "quotation", "project-management"],
+  "keywords": [
+    "business",
+    "document",
+    "generation",
+    "invoice",
+    "quotation",
+    "project-management"
+  ],
   "author": "Your Business Name",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^7.6.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }
