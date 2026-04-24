@@ -236,12 +236,17 @@ export default function Invoices() {
                     <button className="btn btn-primary" onClick={openCreate}><Plus size={15} /> New Invoice</button>
                   </div>
                 </td></tr>
-              ) : invoices.map(inv => (
+              ) : invoices.map(inv => {
+                const client = clients.find(c => c.id === inv.clientId);
+                const displayName = inv.clientName || client?.name || '—';
+                const displayCompany = inv.clientCompany || client?.company || '';
+                const displayNumber = inv.number || `INV-${inv.id?.slice(0,8).toUpperCase()}`;
+                return (
                 <tr key={inv.id}>
-                  <td><strong style={{ color: 'var(--primary)' }}>{inv.number}</strong></td>
+                  <td><strong style={{ color: 'var(--primary)' }}>{displayNumber}</strong></td>
                   <td>
-                    <div style={{ fontWeight: 600 }}>{inv.clientName}</div>
-                    <div style={{ fontSize: 11, color: 'var(--gray-400)' }}>{inv.clientCompany}</div>
+                    <div style={{ fontWeight: 600 }}>{displayName}</div>
+                    <div style={{ fontSize: 11, color: 'var(--gray-400)' }}>{displayCompany}</div>
                   </td>
                   <td style={{ fontSize: 12 }}>{inv.projectName || '-'}</td>
                   <td><strong>{fmt(inv.total ?? 0)}</strong></td>
@@ -266,7 +271,7 @@ export default function Invoices() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         </div>
