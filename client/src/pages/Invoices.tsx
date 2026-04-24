@@ -105,16 +105,43 @@ export default function Invoices() {
   const generatePDF = async (inv: Invoice) => {
     setGenLoading(inv.id);
     try {
+      // Enrich with fallback data from loaded clients list
+      const client = clients.find(c => c.id === inv.clientId);
+      const enriched: any = {
+        ...inv,
+        clientName:    inv.clientName    || client?.name    || '—',
+        clientCompany: inv.clientCompany || client?.company || '',
+        clientEmail:   inv.clientEmail   || client?.email   || '',
+        clientPhone:   inv.clientPhone   || client?.phone   || '',
+        number: inv.number || `INV-${inv.id?.slice(0, 8).toUpperCase()}`,
+        items: (inv.items || []).map((item: any) => ({
+          ...item,
+          description: item.description || '',
+          serviceType: item.serviceType || '',
+          quantity:    Number(item.quantity)  || 1,
+          unitPrice:   Number(item.unitPrice ?? item.rate ?? 0),
+        })),
+      };
+      // Recalculate totals from items
+      const subtotal    = enriched.items.reduce((s: number, i: any) => s + i.quantity * i.unitPrice, 0);
+      const discountAmt = Number(enriched.discountAmt ?? enriched.discount ?? 0);
+      const taxAmount   = Number(enriched.taxAmount   ?? 0);
+      const total       = subtotal - discountAmt + taxAmount;
+      enriched.subtotal    = subtotal    || enriched.subtotal    || 0;
+      enriched.discountAmt = discountAmt || enriched.discountAmt || 0;
+      enriched.taxAmount   = taxAmount   || enriched.taxAmount   || 0;
+      enriched.total       = total       || enriched.total       || 0;
+
       const fmt2 = (n: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n || 0);
       const fmtDate = (d: any) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
-      const items = (inv.items || []).map((item: any, i: number) => `
+      const items = enriched.items.map((item: any, i: number) => `
         <tr style="background:${i % 2 === 0 ? '#fff' : '#fafafa'}">
           <td style="padding:10px 14px;font-size:12px;border-bottom:1px solid #f1f5f9">${i + 1}</td>
           <td style="padding:10px 14px;font-size:12px;border-bottom:1px solid #f1f5f9"><strong>${item.description || ''}</strong></td>
           <td style="padding:10px 14px;font-size:12px;border-bottom:1px solid #f1f5f9">${item.serviceType || ''}</td>
           <td style="padding:10px 14px;font-size:12px;text-align:right;border-bottom:1px solid #f1f5f9">${item.quantity}</td>
           <td style="padding:10px 14px;font-size:12px;text-align:right;border-bottom:1px solid #f1f5f9">${fmt2(item.unitPrice)}</td>
-          <td style="padding:10px 14px;font-size:12px;text-align:right;border-bottom:1px solid #f1f5f9"><strong>${fmt2((item.quantity || 0) * (item.unitPrice || 0))}</strong></td>
+          <td style="padding:10px 14px;font-size:12px;text-align:right;border-bottom:1px solid #f1f5f9"><strong>${fmt2(item.quantity * item.unitPrice)}</strong></td>
         </tr>`).join('');
       const html = `<div id="pdf-content" style="font-family:'Segoe UI',Arial,sans-serif;color:#0f0f0f;background:#fff;padding:40px;max-width:800px;margin:0 auto">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:24px;border-bottom:3px solid #0f0f0f;margin-bottom:24px">
@@ -125,23 +152,23 @@ export default function Invoices() {
           </div>
           <div style="text-align:right">
             <div style="font-size:28px;font-weight:900;letter-spacing:3px;text-transform:uppercase">Invoice</div>
-            <div style="font-size:12px;color:#888;font-family:monospace;margin-top:4px">#${inv.number || ''}</div>
-            <div style="margin-top:8px"><span style="background:${inv.status === 'Paid' ? '#d1fae5' : inv.status === 'Overdue' ? '#fee2e2' : '#fef3c7'};color:${inv.status === 'Paid' ? '#065f46' : inv.status === 'Overdue' ? '#991b1b' : '#92400e'};padding:3px 12px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase">${inv.status}</span></div>
+            <div style="font-size:12px;color:#888;font-family:monospace;margin-top:4px">#${enriched.number}</div>
+            <div style="margin-top:8px"><span style="background:${enriched.status === 'Paid' ? '#d1fae5' : enriched.status === 'Overdue' ? '#fee2e2' : '#fef3c7'};color:${enriched.status === 'Paid' ? '#065f46' : enriched.status === 'Overdue' ? '#991b1b' : '#92400e'};padding:3px 12px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase">${enriched.status}</span></div>
           </div>
         </div>
         <div style="display:flex;gap:40px;margin-bottom:24px">
           <div style="flex:1">
             <div style="font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-family:monospace">Bill To</div>
-            <div style="font-size:16px;font-weight:800">${inv.clientName || ''}</div>
-            <div style="font-size:12px;color:#555;line-height:1.7;margin-top:4px">${inv.clientCompany ? inv.clientCompany + '<br>' : ''}${inv.clientEmail || ''}</div>
+            <div style="font-size:16px;font-weight:800">${enriched.clientName}</div>
+            <div style="font-size:12px;color:#555;line-height:1.7;margin-top:4px">${enriched.clientCompany ? enriched.clientCompany + '<br>' : ''}${enriched.clientEmail || ''}<br>${enriched.clientPhone || ''}</div>
           </div>
           <div style="flex:1">
             <div style="font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-family:monospace">Details</div>
             <div style="font-size:12px;color:#555;line-height:1.8">
-              <strong style="color:#0f0f0f">Date:</strong> ${fmtDate((inv as any).createdAt)}<br>
-              <strong style="color:#0f0f0f">Due:</strong> ${fmtDate(inv.dueDate)}<br>
-              ${inv.projectName ? `<strong style="color:#0f0f0f">Project:</strong> ${inv.projectName}<br>` : ''}
-              ${inv.paymentTerms ? `<strong style="color:#0f0f0f">Terms:</strong> ${inv.paymentTerms}` : ''}
+              <strong style="color:#0f0f0f">Date:</strong> ${fmtDate(enriched.createdAt)}<br>
+              <strong style="color:#0f0f0f">Due:</strong> ${fmtDate(enriched.dueDate)}<br>
+              ${enriched.projectName ? `<strong style="color:#0f0f0f">Project:</strong> ${enriched.projectName}<br>` : ''}
+              ${enriched.paymentTerms ? `<strong style="color:#0f0f0f">Terms:</strong> ${enriched.paymentTerms}` : ''}
             </div>
           </div>
         </div>
@@ -157,12 +184,12 @@ export default function Invoices() {
           <tbody>${items}</tbody>
         </table>
         <div style="margin-left:auto;width:280px;margin-top:16px">
-          <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee"><span>Subtotal</span><span>${fmt2(inv.subtotal || 0)}</span></div>
-          ${(inv.discountAmt || 0) > 0 ? `<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee;color:#059669"><span>Discount</span><span>−${fmt2(inv.discountAmt || 0)}</span></div>` : ''}
-          ${(inv.taxRate || 0) > 0 ? `<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee"><span>GST (${inv.taxRate}%)</span><span>${fmt2(inv.taxAmount || 0)}</span></div>` : ''}
-          <div style="display:flex;justify-content:space-between;padding:12px 0 4px;font-size:20px;font-weight:900;border-top:3px solid #0f0f0f;margin-top:4px"><span>Total</span><span>${fmt2(inv.total || 0)}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee"><span>Subtotal</span><span>${fmt2(enriched.subtotal)}</span></div>
+          ${enriched.discountAmt > 0 ? `<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee;color:#059669"><span>Discount</span><span>−${fmt2(enriched.discountAmt)}</span></div>` : ''}
+          ${enriched.taxRate > 0 ? `<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee"><span>GST (${enriched.taxRate}%)</span><span>${fmt2(enriched.taxAmount)}</span></div>` : ''}
+          <div style="display:flex;justify-content:space-between;padding:12px 0 4px;font-size:20px;font-weight:900;border-top:3px solid #0f0f0f;margin-top:4px"><span>Total</span><span>${fmt2(enriched.total)}</span></div>
         </div>
-        ${inv.notes ? `<div style="background:#fafafa;border-left:4px solid #0f0f0f;padding:14px 18px;border-radius:0 8px 8px 0;margin-top:24px;font-size:12px;line-height:1.7;color:#555"><strong>Notes:</strong><br>${inv.notes}</div>` : ''}
+        ${enriched.notes ? `<div style="background:#fafafa;border-left:4px solid #0f0f0f;padding:14px 18px;border-radius:0 8px 8px 0;margin-top:24px;font-size:12px;line-height:1.7;color:#555"><strong>Notes:</strong><br>${enriched.notes}</div>` : ''}
         <div style="margin-top:40px;padding-top:16px;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;font-size:11px;color:#888">
           <div>Thank you for choosing IzaXotic!<br><span style="font-family:monospace;font-size:10px;color:#bbb">SYS://GENERATED · IzaXpro · ${new Date().getFullYear()}</span></div>
           <div style="text-align:right">Authorized Signatory<br><strong style="color:#0f0f0f">IzaXotic</strong></div>
