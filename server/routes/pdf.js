@@ -3,7 +3,8 @@ const router = express.Router();
 const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs-extra');
-const { readData } = require('../utils/db');
+const { readData, useMongo } = require('../utils/db');
+const { Invoice, Quotation, Proposal } = require('../models');
 
 const COMPANY = {
   name: 'IzaXotic',
@@ -244,7 +245,18 @@ const generatePDF = async (html, filename) => {
   const pdfDir = path.join(__dirname, '../data/pdfs');
   await fs.ensureDir(pdfDir);
   const filePath = path.join(pdfDir, filename);
-  const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process'
+    ]
+  });
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: 'networkidle0' });
   await page.pdf({ path: filePath, format: 'A4', printBackground: true, margin: { top: '20px', bottom: '20px' } });
@@ -255,8 +267,12 @@ const generatePDF = async (html, filename) => {
 // Generate Invoice PDF
 router.post('/invoice/:id', async (req, res) => {
   try {
-    const invoices = readData('invoices');
-    const doc = invoices.find(i => i.id === req.params.id);
+    let doc;
+    if (useMongo()) {
+      doc = await Invoice.findOne({ id: req.params.id }).lean();
+    } else {
+      doc = readData('invoices').find(i => i.id === req.params.id);
+    }
     if (!doc) return res.status(404).json({ error: 'Invoice not found' });
     const html = buildInvoiceHTML(doc, 'INVOICE');
     const filename = `invoice-${doc.number}.pdf`;
@@ -268,8 +284,12 @@ router.post('/invoice/:id', async (req, res) => {
 // Generate Quotation PDF
 router.post('/quotation/:id', async (req, res) => {
   try {
-    const quotations = readData('quotations');
-    const doc = quotations.find(q => q.id === req.params.id);
+    let doc;
+    if (useMongo()) {
+      doc = await Quotation.findOne({ id: req.params.id }).lean();
+    } else {
+      doc = readData('quotations').find(q => q.id === req.params.id);
+    }
     if (!doc) return res.status(404).json({ error: 'Quotation not found' });
     const html = buildInvoiceHTML(doc, 'QUOTATION');
     const filename = `quotation-${doc.number}.pdf`;
@@ -281,8 +301,12 @@ router.post('/quotation/:id', async (req, res) => {
 // Generate Proposal PDF
 router.post('/proposal/:id', async (req, res) => {
   try {
-    const proposals = readData('proposals');
-    const doc = proposals.find(p => p.id === req.params.id);
+    let doc;
+    if (useMongo()) {
+      doc = await Proposal.findOne({ id: req.params.id }).lean();
+    } else {
+      doc = readData('proposals').find(p => p.id === req.params.id);
+    }
     if (!doc) return res.status(404).json({ error: 'Proposal not found' });
     const html = buildProposalHTML(doc);
     const filename = `proposal-${doc.number}.pdf`;

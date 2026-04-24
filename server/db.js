@@ -3,16 +3,16 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
   const uri = process.env.MONGODB_URI;
   if (!uri) {
-    console.log('[DB] MONGODB_URI not set — using JSON flat files');
-    return false;
+    console.error('[DB] FATAL: MONGODB_URI is not set. Set it in your environment variables.');
+    process.exit(1);
   }
   try {
     await mongoose.connect(uri);
     console.log('[DB] MongoDB connected');
     return true;
   } catch (err) {
-    console.error('[DB] MongoDB connection error:', err.message);
-    return false;
+    console.error('[DB] FATAL: MongoDB connection error:', err.message);
+    process.exit(1);
   }
 };
 
