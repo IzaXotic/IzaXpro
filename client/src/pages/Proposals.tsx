@@ -60,7 +60,7 @@ export default function Proposals() {
     const paymentSplits = p.paymentSplits?.length
       ? p.paymentSplits
       : [{ label: 'Kickoff / Advance', percent: 40 }, { label: 'Mid-Point', percent: 30 }, { label: 'Final Delivery', percent: 30 }];
-    setForm({ ...emptyForm, ...p, baseAmount, taxRate, discount, paymentSplits });
+    setForm({ ...emptyForm, ...p, baseAmount, taxRate, discount, paymentSplits, validUntil: p.validUntil ? new Date(p.validUntil).toISOString().split('T')[0] : '' });
     setShowModal(true);
   };
 

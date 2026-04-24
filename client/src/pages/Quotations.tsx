@@ -39,7 +39,8 @@ export default function Quotations() {
   useEffect(() => { load(); }, []);
 
   const openCreate = () => { setEditing(null); setForm({ ...emptyForm, items: [{ ...emptyItem }] }); setShowModal(true); };
-  const openEdit   = (q: any) => { setEditing(q); setForm({ ...emptyForm, ...q }); setShowModal(true); };
+  const toDateStr = (val: any) => val ? new Date(val).toISOString().split('T')[0] : '';
+  const openEdit   = (q: any) => { setEditing(q); setForm({ ...emptyForm, ...q, validUntil: toDateStr(q.validUntil) }); setShowModal(true); };
 
   const handleClientChange = (clientId: string) => {
     const c = clients.find(x => x.id === clientId);

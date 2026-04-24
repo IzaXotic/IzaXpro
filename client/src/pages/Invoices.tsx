@@ -39,7 +39,8 @@ export default function Invoices() {
   useEffect(() => { load(); }, []);
 
   const openCreate = () => { setEditing(null); setForm({ ...emptyForm, items: [{ ...emptyItem }] }); setShowModal(true); };
-  const openEdit   = (inv: any) => { setEditing(inv); setForm({ ...emptyForm, ...inv }); setShowModal(true); };
+  const toDateStr = (val: any) => val ? new Date(val).toISOString().split('T')[0] : '';
+  const openEdit   = (inv: any) => { setEditing(inv); setForm({ ...emptyForm, ...inv, dueDate: toDateStr(inv.dueDate) }); setShowModal(true); };
 
   const handleClientChange = (clientId: string) => {
     const c = clients.find(x => x.id === clientId);

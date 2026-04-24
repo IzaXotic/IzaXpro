@@ -42,6 +42,11 @@ export default function Projects() {
 
   const clientName = (id: string) => clients.find(c => c.id === id)?.name || '-';
 
+  const toDateStr = (val: any): string => {
+    if (!val) return '';
+    return new Date(val).toISOString().split('T')[0];
+  };
+
   const openCreate = () => { setEditing(null); setForm(emptyForm); setShowModal(true); };
   const openEdit = (p: Project) => {
     setEditing(p);
@@ -49,8 +54,8 @@ export default function Projects() {
       ...emptyForm, ...p,
       budget: String(p.budget ?? ''),
       estimatedHours: String(p.estimatedHours ?? ''),
-      startDate: p.startDate?.split('T')[0] || '',
-      deadline:  p.deadline?.split('T')[0]  || '',
+      startDate: toDateStr(p.startDate),
+      deadline:  toDateStr(p.deadline),
     });
     setShowModal(true);
   };
@@ -74,7 +79,7 @@ export default function Projects() {
     setActiveProjId(projId); setEditingMs(null);
     setMsForm({ ...emptyMilestone, projectId: projId }); setShowMsModal(true);
   };
-  const openEditMs = (ms: any) => { setEditingMs(ms); setMsForm({ ...ms }); setActiveProjId(ms.projectId); setShowMsModal(true); };
+  const openEditMs = (ms: any) => { setEditingMs(ms); setMsForm({ ...ms, dueDate: toDateStr(ms.dueDate) }); setActiveProjId(ms.projectId); setShowMsModal(true); };
 
   const handleMsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
