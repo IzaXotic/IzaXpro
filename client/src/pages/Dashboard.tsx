@@ -4,6 +4,7 @@ import {
   DollarSign, AlertCircle, CheckCircle, Clock, Calendar
 } from 'lucide-react';
 import { dashboardAPI } from '../services/api';
+import DatePicker from '../components/DatePicker';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444'];
@@ -122,11 +123,11 @@ export default function Dashboard() {
 
         {/* Custom date pickers */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto', flexWrap: 'wrap' }}>
-          <input type="date" className="form-control" style={{ height: 32, fontSize: 12, width: 140 }}
-            value={from} onChange={e => { setFrom(e.target.value); setPreset('Custom'); }} />
+          <DatePicker value={from} onChange={v => { setFrom(v); setPreset('Custom'); }}
+            style={{ height: 32, fontSize: 12, width: 140 }} />
           <span style={{ fontSize: 12, color: 'var(--gray-400)' }}>to</span>
-          <input type="date" className="form-control" style={{ height: 32, fontSize: 12, width: 140 }}
-            value={to} onChange={e => { setTo(e.target.value); setPreset('Custom'); }} />
+          <DatePicker value={to} onChange={v => { setTo(v); setPreset('Custom'); }}
+            style={{ height: 32, fontSize: 12, width: 140 }} />
           <button className="btn btn-primary" onClick={applyCustom}
             style={{ height: 32, padding: '0 14px', fontSize: 12 }}>
             Apply
