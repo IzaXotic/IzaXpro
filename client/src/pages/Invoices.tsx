@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, FileText, Download, ArrowRight, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { invoicesAPI, clientsAPI, projectsAPI, pdfAPI } from '../services/api';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { invoicesAPI, clientsAPI, projectsAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
 import DatePicker from '../components/DatePicker';
 import { useConfig } from '../hooks/useConfig';
@@ -41,7 +43,18 @@ export default function Invoices() {
 
   const openCreate = () => { setEditing(null); setForm({ ...emptyForm, items: [{ ...emptyItem }] }); setShowModal(true); };
   const toDateStr = (val: any) => val ? new Date(val).toISOString().split('T')[0] : '';
-  const openEdit   = (inv: any) => { setEditing(inv); setForm({ ...emptyForm, ...inv, dueDate: toDateStr(inv.dueDate) }); setShowModal(true); };
+  const openEdit   = (inv: any) => {
+    setEditing(inv);
+    // Normalize items — MongoDB may store 'rate' instead of 'unitPrice'
+    const items = (inv.items || []).map((item: any) => ({
+      description: item.description || '',
+      serviceType: item.serviceType || '',
+      quantity: Number(item.quantity) || 1,
+      unitPrice: Number(item.unitPrice ?? item.rate ?? item.amount ?? 0),
+    }));
+    setForm({ ...emptyForm, ...inv, items, dueDate: toDateStr(inv.dueDate) });
+    setShowModal(true);
+  };
 
   const handleClientChange = (clientId: string) => {
     const c = clients.find(x => x.id === clientId);
@@ -89,14 +102,87 @@ export default function Invoices() {
     catch { toast.error('Failed to delete'); }
   };
 
-  const generatePDF = async (id: string) => {
-    setGenLoading(id);
+  const generatePDF = async (inv: Invoice) => {
+    setGenLoading(inv.id);
     try {
-      const r = await pdfAPI.generateInvoice(id);
-      const baseUrl = process.env.NODE_ENV === 'production' ? window.location.origin : 'http://localhost:5001';
-      window.open(`${baseUrl}${r.data.url}`, '_blank');
-      toast.success('PDF generated!');
-    } catch { toast.error('PDF generation failed. Make sure server is running.'); }
+      const fmt2 = (n: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n || 0);
+      const fmtDate = (d: any) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+      const items = (inv.items || []).map((item: any, i: number) => `
+        <tr style="background:${i % 2 === 0 ? '#fff' : '#fafafa'}">
+          <td style="padding:10px 14px;font-size:12px;border-bottom:1px solid #f1f5f9">${i + 1}</td>
+          <td style="padding:10px 14px;font-size:12px;border-bottom:1px solid #f1f5f9"><strong>${item.description || ''}</strong></td>
+          <td style="padding:10px 14px;font-size:12px;border-bottom:1px solid #f1f5f9">${item.serviceType || ''}</td>
+          <td style="padding:10px 14px;font-size:12px;text-align:right;border-bottom:1px solid #f1f5f9">${item.quantity}</td>
+          <td style="padding:10px 14px;font-size:12px;text-align:right;border-bottom:1px solid #f1f5f9">${fmt2(item.unitPrice)}</td>
+          <td style="padding:10px 14px;font-size:12px;text-align:right;border-bottom:1px solid #f1f5f9"><strong>${fmt2((item.quantity || 0) * (item.unitPrice || 0))}</strong></td>
+        </tr>`).join('');
+      const html = `<div id="pdf-content" style="font-family:'Segoe UI',Arial,sans-serif;color:#0f0f0f;background:#fff;padding:40px;max-width:800px;margin:0 auto">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:24px;border-bottom:3px solid #0f0f0f;margin-bottom:24px">
+          <div>
+            <div style="font-size:26px;font-weight:900;letter-spacing:-1px">Iza<span style="color:#7c3aed">Xotic</span></div>
+            <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin-top:4px">Custom Web Development & UI/UX Design Studio</div>
+            <div style="font-size:11px;color:#555;margin-top:8px;line-height:1.7">Remote-First, India<br>hello@izaxotic.com</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:28px;font-weight:900;letter-spacing:3px;text-transform:uppercase">Invoice</div>
+            <div style="font-size:12px;color:#888;font-family:monospace;margin-top:4px">#${inv.number || ''}</div>
+            <div style="margin-top:8px"><span style="background:${inv.status === 'Paid' ? '#d1fae5' : inv.status === 'Overdue' ? '#fee2e2' : '#fef3c7'};color:${inv.status === 'Paid' ? '#065f46' : inv.status === 'Overdue' ? '#991b1b' : '#92400e'};padding:3px 12px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase">${inv.status}</span></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:40px;margin-bottom:24px">
+          <div style="flex:1">
+            <div style="font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-family:monospace">Bill To</div>
+            <div style="font-size:16px;font-weight:800">${inv.clientName || ''}</div>
+            <div style="font-size:12px;color:#555;line-height:1.7;margin-top:4px">${inv.clientCompany ? inv.clientCompany + '<br>' : ''}${inv.clientEmail || ''}</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-family:monospace">Details</div>
+            <div style="font-size:12px;color:#555;line-height:1.8">
+              <strong style="color:#0f0f0f">Date:</strong> ${fmtDate((inv as any).createdAt)}<br>
+              <strong style="color:#0f0f0f">Due:</strong> ${fmtDate(inv.dueDate)}<br>
+              ${inv.projectName ? `<strong style="color:#0f0f0f">Project:</strong> ${inv.projectName}<br>` : ''}
+              ${inv.paymentTerms ? `<strong style="color:#0f0f0f">Terms:</strong> ${inv.paymentTerms}` : ''}
+            </div>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0">
+          <thead><tr style="background:#0f0f0f;color:white">
+            <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:1px">#</th>
+            <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:1px">Description</th>
+            <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:1px">Service</th>
+            <th style="padding:12px 14px;text-align:right;font-size:11px;font-weight:700;letter-spacing:1px">Qty</th>
+            <th style="padding:12px 14px;text-align:right;font-size:11px;font-weight:700;letter-spacing:1px">Unit Price</th>
+            <th style="padding:12px 14px;text-align:right;font-size:11px;font-weight:700;letter-spacing:1px">Amount</th>
+          </tr></thead>
+          <tbody>${items}</tbody>
+        </table>
+        <div style="margin-left:auto;width:280px;margin-top:16px">
+          <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee"><span>Subtotal</span><span>${fmt2(inv.subtotal || 0)}</span></div>
+          ${(inv.discountAmt || 0) > 0 ? `<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee;color:#059669"><span>Discount</span><span>−${fmt2(inv.discountAmt || 0)}</span></div>` : ''}
+          ${(inv.taxRate || 0) > 0 ? `<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee"><span>GST (${inv.taxRate}%)</span><span>${fmt2(inv.taxAmount || 0)}</span></div>` : ''}
+          <div style="display:flex;justify-content:space-between;padding:12px 0 4px;font-size:20px;font-weight:900;border-top:3px solid #0f0f0f;margin-top:4px"><span>Total</span><span>${fmt2(inv.total || 0)}</span></div>
+        </div>
+        ${inv.notes ? `<div style="background:#fafafa;border-left:4px solid #0f0f0f;padding:14px 18px;border-radius:0 8px 8px 0;margin-top:24px;font-size:12px;line-height:1.7;color:#555"><strong>Notes:</strong><br>${inv.notes}</div>` : ''}
+        <div style="margin-top:40px;padding-top:16px;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;font-size:11px;color:#888">
+          <div>Thank you for choosing IzaXotic!<br><span style="font-family:monospace;font-size:10px;color:#bbb">SYS://GENERATED · IzaXpro · ${new Date().getFullYear()}</span></div>
+          <div style="text-align:right">Authorized Signatory<br><strong style="color:#0f0f0f">IzaXotic</strong></div>
+        </div>
+      </div>`;
+
+      const container = document.createElement('div');
+      container.style.cssText = 'position:fixed;left:-9999px;top:0;background:#fff;z-index:-1';
+      container.innerHTML = html;
+      document.body.appendChild(container);
+      const canvas = await html2canvas(container.firstChild as HTMLElement, { scale: 2, useCORS: true, backgroundColor: '#fff' });
+      document.body.removeChild(container);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const w = pdf.internal.pageSize.getWidth();
+      const h = (canvas.height * w) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, w, h);
+      pdf.save(`invoice-${inv.number || inv.id}.pdf`);
+      toast.success('PDF downloaded!');
+    } catch (err) { toast.error('PDF generation failed'); }
     finally { setGenLoading(null); }
   };
 
@@ -173,7 +259,7 @@ export default function Invoices() {
                   <td>
                     <div style={{ display: 'flex', gap: 5 }}>
                       <button className="btn btn-ghost btn-xs" onClick={() => openEdit(inv)} title="Edit"><Pencil size={12} /></button>
-                      <button className="btn btn-ghost btn-xs" style={{ color: 'var(--success)' }} onClick={() => generatePDF(inv.id)} title="Download PDF" disabled={genLoading === inv.id}>
+                      <button className="btn btn-ghost btn-xs" style={{ color: 'var(--success)' }} onClick={() => generatePDF(inv)} title="Download PDF" disabled={genLoading === inv.id}>
                         {genLoading === inv.id ? '...' : <Download size={12} />}
                       </button>
                       <button className="btn btn-xs" style={{ background: '#fee2e2', color: '#ef4444' }} onClick={() => handleDelete(inv.id)} title="Delete"><Trash2 size={12} /></button>
