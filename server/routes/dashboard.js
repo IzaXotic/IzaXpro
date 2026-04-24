@@ -1,22 +1,34 @@
 const express = require('express');
 const router = express.Router();
-const { readData } = require('../utils/db');
+const { readData, useMongo } = require('../utils/db');
+const { Client, Project, Invoice, Quotation, Support } = require('../models');
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const clients    = readData('clients');
-    const projects   = readData('projects');
-    const invoices   = readData('invoices');
-    const quotations = readData('quotations');
-    const support    = readData('support');
-    const milestones = readData('milestones');
+    let clients, projects, invoices, quotations, support;
+
+    if (useMongo()) {
+      [clients, projects, invoices, quotations, support] = await Promise.all([
+        Client.find().lean(),
+        Project.find().lean(),
+        Invoice.find().lean(),
+        Quotation.find().lean(),
+        Support.find().lean(),
+      ]);
+    } else {
+      clients    = readData('clients');
+      projects   = readData('projects');
+      invoices   = readData('invoices');
+      quotations = readData('quotations');
+      support    = readData('support');
+    }
 
     const totalRevenue      = invoices.filter(i => i.status === 'Paid').reduce((s, i) => s + (i.total || 0), 0);
     const pendingRevenue    = invoices.filter(i => i.status === 'Sent' || i.status === 'Overdue').reduce((s, i) => s + (i.total || 0), 0);
     const activeProjects    = projects.filter(p => p.status === 'In Progress').length;
     const completedProjects = projects.filter(p => p.status === 'Completed').length;
 
-    // Monthly revenue (last 6 months)
+    // Monthly revenue (last 6 months) — use dueDate or updatedAt, whichever exists
     const monthlyRevenue = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date();
@@ -24,7 +36,13 @@ router.get('/', (req, res) => {
       const month = d.toLocaleString('default', { month: 'short' });
       const year  = d.getFullYear();
       const revenue = invoices
-        .filter(inv => inv.status === 'Paid' && new Date(inv.updatedAt).getMonth() === d.getMonth() && new Date(inv.updatedAt).getFullYear() === year)
+        .filter(inv => {
+          if (inv.status !== 'Paid') return false;
+          const dateStr = inv.updatedAt || inv.dueDate || inv.createdAt;
+          if (!dateStr) return false;
+          const dt = new Date(dateStr);
+          return dt.getMonth() === d.getMonth() && dt.getFullYear() === year;
+        })
         .reduce((s, inv) => s + (inv.total || 0), 0);
       monthlyRevenue.push({ month: `${month} ${year}`, revenue });
     }
