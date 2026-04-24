@@ -1,0 +1,15 @@
+services:
+  # ── Full-stack Web Service (Backend serves React build) ──────────────────────
+  - type: web
+    name: izaxotic-app
+    runtime: node
+    rootDir: .
+    buildCommand: npm run render-build
+    startCommand: npm run render-start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    # Render free tier auto-sleeps after 15 min inactivity
+    plan: free

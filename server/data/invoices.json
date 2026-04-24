@@ -1,0 +1,103 @@
+[
+  {
+    "id": "9f857f25-2dac-4d5d-b73a-d56289804844",
+    "number": "INV-2026-0001",
+    "clientId": "cb302b37-1040-4a54-a753-e0127bd6ac28",
+    "clientName": "Arjun Sharma",
+    "clientEmail": "arjun@techventures.in",
+    "clientPhone": "+91 98765 43210",
+    "clientCompany": "TechVentures Pvt Ltd",
+    "clientAddress": "12, Koramangala, Bengaluru, Karnataka 560034",
+    "projectName": "E-Commerce Platform Development",
+    "items": [
+      {
+        "description": "Full-Stack E-Commerce Website (Next.js + Node.js)",
+        "serviceType": "Web Development",
+        "quantity": 1,
+        "unitPrice": 85000
+      },
+      {
+        "description": "Custom Admin Dashboard & Analytics Panel",
+        "serviceType": "Web Development",
+        "quantity": 1,
+        "unitPrice": 25000
+      },
+      {
+        "description": "UI/UX Design — Wireframes, Prototypes & Design System",
+        "serviceType": "UI/UX Design",
+        "quantity": 1,
+        "unitPrice": 20000
+      },
+      {
+        "description": "Razorpay Payment Gateway Integration",
+        "serviceType": "Web Development",
+        "quantity": 1,
+        "unitPrice": 8000
+      },
+      {
+        "description": "Post-Launch Maintenance (3 months)",
+        "serviceType": "Maintenance",
+        "quantity": 3,
+        "unitPrice": 4000
+      }
+    ],
+    "taxRate": 18,
+    "discount": 5000,
+    "status": "Paid",
+    "paymentTerms": "Net 30",
+    "dueDate": "2026-03-15",
+    "notes": "Payment received via bank transfer on 12 Mar 2026. Thank you for choosing IzaXotic!",
+    "subtotal": 150000,
+    "discountAmt": 5000,
+    "taxAmount": 26100,
+    "total": 171100,
+    "createdAt": "2026-03-01T10:00:00.000Z",
+    "updatedAt": "2026-03-15T12:00:00.000Z"
+  },
+  {
+    "id": "66c767cc-2f78-4b62-9834-f3732412b00e",
+    "number": "INV-2026-0002",
+    "clientId": "cb302b37-1040-4a54-a753-e0127bd6ac28",
+    "clientName": "Arjun Sharma",
+    "clientEmail": "arjun@techventures.in",
+    "clientPhone": "+91 98765 43210",
+    "clientCompany": "TechVentures Pvt Ltd",
+    "clientAddress": "12, Koramangala, Bengaluru, Karnataka 560034",
+    "projectName": "Mobile App — Phase 2",
+    "items": [
+      {
+        "description": "React Native Mobile App (iOS + Android)",
+        "serviceType": "Web Development",
+        "quantity": 1,
+        "unitPrice": 75000
+      },
+      {
+        "description": "Push Notifications & Real-time Chat",
+        "serviceType": "Web Development",
+        "quantity": 1,
+        "unitPrice": 18000
+      },
+      {
+        "description": "UI/UX Design for Mobile",
+        "serviceType": "UI/UX Design",
+        "quantity": 1,
+        "unitPrice": 15000
+      }
+    ],
+    "taxRate": 18,
+    "discount": 5000,
+    "status": "Draft",
+    "paymentTerms": "50% Advance, 50% on Delivery",
+    "validUntil": "2026-05-15",
+    "notes": "This quotation is valid for 30 days. Prices include GST.",
+    "subtotal": 108000,
+    "discountAmt": 5000,
+    "taxAmount": 18540,
+    "total": 121540,
+    "createdAt": "2026-04-24T03:59:05.600Z",
+    "updatedAt": "2026-04-24T03:59:05.600Z",
+    "type": "Invoice",
+    "quotationId": "1a70c4bb-7974-4528-a693-3618daf6dd9b",
+    "dueDate": "2026-05-24T03:59:05.600Z"
+  }
+]

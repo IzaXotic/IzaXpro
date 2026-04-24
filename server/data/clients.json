@@ -1,0 +1,19 @@
+[
+  {
+    "id": "cb302b37-1040-4a54-a753-e0127bd6ac28",
+    "name": "Arjun Sharma",
+    "email": "arjun@techventures.in",
+    "phone": "+91 98765 43210",
+    "company": "TechVentures Pvt Ltd",
+    "address": "12, Koramangala, Bengaluru, Karnataka 560034",
+    "website": "https://techventures.in",
+    "services": [
+      "Web Development",
+      "UI/UX Design"
+    ],
+    "status": "Active",
+    "notes": "Interested in a full-stack e-commerce platform with custom dashboard.",
+    "createdAt": "2026-04-24T03:29:13.409Z",
+    "updatedAt": "2026-04-24T03:29:13.409Z"
+  }
+]
