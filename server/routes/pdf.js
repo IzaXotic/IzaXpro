@@ -11,7 +11,7 @@ const COMPANY = {
   address: 'Remote-First, India — Serving Clients Worldwide',
   phone: '+91 98765 43210',
   email: 'hello@izaxotic.com',
-  website: 'izaxotic.com',
+  website: 'izaxpro.onrender.com',
   gstin: 'GSTIN: Add Your GSTIN Here',
   bankName: 'Add Your Bank',
   accountNo: 'Add Account No.',

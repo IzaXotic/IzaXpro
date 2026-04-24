@@ -92,7 +92,7 @@ function App() {
               <img src="/logo.png" alt="" style={{ width: 20, height: 20, objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(124,58,237,0.6))' }} />
               IzaXpro
             </div>
-            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.3px' }}>SYS://STUDIO · INDIA · REMOTE</span>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.3px' }}>izaxpro.onrender.com</span>
           </div>
         </div>
       </aside>

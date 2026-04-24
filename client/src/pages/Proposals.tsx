@@ -101,7 +101,8 @@ export default function Proposals() {
     setGenLoading(id);
     try {
       const r = await pdfAPI.generateProposal(id);
-      window.open(`http://localhost:5001${r.data.url}`, '_blank');
+      const baseUrl = process.env.NODE_ENV === 'production' ? 'https://izaxpro.onrender.com' : 'http://localhost:5001';
+      window.open(`${baseUrl}${r.data.url}`, '_blank');
       toast.success('Proposal PDF generated!');
     } catch { toast.error('PDF generation failed.'); }
     finally { setGenLoading(null); }

@@ -87,7 +87,8 @@ export default function Quotations() {
     setGenLoading(id);
     try {
       const r = await pdfAPI.generateQuotation(id);
-      window.open(`http://localhost:5001${r.data.url}`, '_blank');
+      const baseUrl = process.env.NODE_ENV === 'production' ? 'https://izaxpro.onrender.com' : 'http://localhost:5001';
+      window.open(`${baseUrl}${r.data.url}`, '_blank');
       toast.success('PDF generated!');
     } catch { toast.error('PDF generation failed.'); }
     finally { setGenLoading(null); }

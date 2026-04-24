@@ -214,7 +214,7 @@ Total           = Taxable Amount + Tax`}
     q: 'How do I generate a PDF for a document?',
     a: (
       <p>
-        On the <strong>Invoices</strong>, <strong>Quotations</strong>, and <strong>Proposals</strong> pages, every row in the table has a <strong style={{ color: '#a78bfa' }}>PDF</strong> button (download icon). Clicking it calls the backend Puppeteer renderer and downloads a branded IzaXpro PDF immediately. Make sure the backend server is running on port <code style={{ fontFamily: "'JetBrains Mono', monospace", color: '#c4b5fd' }}>5001</code>.
+        On the <strong>Invoices</strong>, <strong>Quotations</strong>, and <strong>Proposals</strong> pages, every row in the table has a <strong style={{ color: '#a78bfa' }}>PDF</strong> button (download icon). Clicking it calls the backend Puppeteer renderer and downloads a branded IzaXpro PDF immediately. The app is live at <a href="https://izaxpro.onrender.com" target="_blank" rel="noreferrer" style={{ color: '#a78bfa' }}>izaxpro.onrender.com</a>.
       </p>
     ),
   },
@@ -267,10 +267,10 @@ cd client && npm start`}
       <div>
         <p>Check these in order:</p>
         <ol style={{ paddingLeft: 18, color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, fontSize: 13 }}>
-          <li>Is the backend server running? Check your terminal for <code style={{ fontFamily: "'JetBrains Mono', monospace", color: '#c4b5fd' }}>Server running on port 5001</code>.</li>
+          <li>Is the backend server running? In production this is handled automatically at <a href="https://izaxpro.onrender.com" target="_blank" rel="noreferrer" style={{ color: '#a78bfa' }}>izaxpro.onrender.com</a>. Locally, check your terminal for <code style={{ fontFamily: "'JetBrains Mono', monospace", color: '#c4b5fd' }}>Server running on port 5001</code>.</li>
           <li>Is something else using port 5001? Run <code style={{ fontFamily: "'JetBrains Mono', monospace", color: '#c4b5fd' }}>lsof -i :5001</code> and kill the conflicting process.</li>
           <li>Is the <code style={{ fontFamily: "'JetBrains Mono', monospace", color: '#c4b5fd' }}>server/data/</code> folder missing? Create it and add empty JSON arrays <code style={{ fontFamily: "'JetBrains Mono', monospace", color: '#c4b5fd' }}>[]</code> in each file.</li>
-          <li>Check <code style={{ fontFamily: "'JetBrains Mono', monospace", color: '#c4b5fd' }}>client/src/api.ts</code> — baseURL should be <code style={{ fontFamily: "'JetBrains Mono', monospace", color: '#c4b5fd' }}>http://localhost:5001</code>.</li>
+          <li>Check <code style={{ fontFamily: "'JetBrains Mono', monospace", color: '#c4b5fd' }}>client/src/services/api.ts</code> — in production, the baseURL auto-resolves to <code style={{ fontFamily: "'JetBrains Mono', monospace", color: '#c4b5fd' }}>/api</code> (relative, same origin).</li>
         </ol>
       </div>
     ),

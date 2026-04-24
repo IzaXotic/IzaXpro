@@ -89,7 +89,8 @@ export default function Invoices() {
     setGenLoading(id);
     try {
       const r = await pdfAPI.generateInvoice(id);
-      window.open(`http://localhost:5001${r.data.url}`, '_blank');
+      const baseUrl = process.env.NODE_ENV === 'production' ? 'https://izaxpro.onrender.com' : 'http://localhost:5001';
+      window.open(`${baseUrl}${r.data.url}`, '_blank');
       toast.success('PDF generated!');
     } catch { toast.error('PDF generation failed. Make sure server is running.'); }
     finally { setGenLoading(null); }
