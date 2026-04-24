@@ -148,7 +148,7 @@ export default function Proposals() {
           </div>
         </div>
 
-        <div style="text-align:center;padding:40px 30px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border-radius:12px;margin-bottom:28px">
+        <div style="text-align:center;padding:40px 30px;background:#6366f1;color:white;border-radius:12px;margin-bottom:28px">
           <div style="font-size:28px;font-weight:900;margin-bottom:10px">${p.title || 'Project Proposal'}</div>
           <div style="font-size:13px;opacity:0.9">Prepared for: <span style="font-weight:700">${p.clientName}${p.clientCompany ? ' — ' + p.clientCompany : ''}</span></div>
           <div style="font-size:12px;opacity:0.8;margin-top:6px">Date: ${fmtDate(p.createdAt)} &nbsp;|&nbsp; Valid Until: ${fmtDate(p.validUntil)}</div>
@@ -162,7 +162,7 @@ export default function Proposals() {
 
         ${p.investmentAmount ? `<div style="margin-bottom:24px">
           <div style="font-size:16px;font-weight:700;color:#6366f1;border-bottom:2px solid #e0e7ff;padding-bottom:8px;margin-bottom:12px">Investment</div>
-          <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border-radius:12px;padding:24px;text-align:center;margin-bottom:16px">
+          <div style="background:#6366f1;color:white;border-radius:12px;padding:24px;text-align:center;margin-bottom:16px">
             <div style="font-size:13px;opacity:0.85">Total Project Investment</div>
             <div style="font-size:40px;font-weight:900;margin:8px 0">${fmtAmt(p.investmentAmount)}</div>
             ${p.paymentSchedule ? `<div style="font-size:13px;opacity:0.85">${p.paymentSchedule}</div>` : ''}
@@ -180,10 +180,10 @@ export default function Proposals() {
       </div>`;
 
       const container = document.createElement('div');
-      container.style.cssText = 'position:absolute;top:0;left:0;visibility:hidden;pointer-events:none;z-index:-1';
+      container.style.cssText = 'position:absolute;top:0;left:0;opacity:0;pointer-events:none;z-index:-1';
       container.innerHTML = html;
       document.body.appendChild(container);
-      const canvas = await html2canvas(container.firstChild as HTMLElement, { scale: 2, useCORS: true, backgroundColor: '#fff' });
+      const canvas = await html2canvas(container.firstChild as HTMLElement, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#fff' });
       document.body.removeChild(container);
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');

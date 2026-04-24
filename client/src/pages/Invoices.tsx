@@ -204,11 +204,11 @@ export default function Invoices() {
       </div>`;
 
       const container = document.createElement('div');
-      // Use visibility:hidden + position:absolute so html2canvas can measure layout properly
-      container.style.cssText = 'position:absolute;top:0;left:0;visibility:hidden;pointer-events:none;z-index:-1';
+      // Use opacity:0 + position:absolute so html2canvas can measure and render layout properly
+      container.style.cssText = 'position:absolute;top:0;left:0;opacity:0;pointer-events:none;z-index:-1';
       container.innerHTML = html;
       document.body.appendChild(container);
-      const canvas = await html2canvas(container.firstChild as HTMLElement, { scale: 2, useCORS: true, backgroundColor: '#fff' });
+      const canvas = await html2canvas(container.firstChild as HTMLElement, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#fff' });
       document.body.removeChild(container);
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
