@@ -135,22 +135,26 @@ export default function Invoices() {
       enriched.taxAmount   = taxAmount;
       enriched.total       = total;
 
-      const fmt2 = (n: number) => '\u20B9' + (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      // ASCII-safe currency formatter — avoids ₹ glyph missing from html2canvas fonts
+      const fmt2 = (n: number) => 'Rs.' + (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       const fmtDate = (d: any) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
-      const items = enriched.items.map((item: any, i: number) => `
-        <tr style="background:${i % 2 === 0 ? '#fff' : '#fafafa'}">
-          <td style="padding:10px 14px;font-size:12px;border-bottom:1px solid #f1f5f9">${i + 1}</td>
-          <td style="padding:10px 14px;font-size:12px;border-bottom:1px solid #f1f5f9"><strong>${item.description || ''}</strong></td>
-          <td style="padding:10px 14px;font-size:12px;border-bottom:1px solid #f1f5f9">${item.serviceType || ''}</td>
-          <td style="padding:10px 14px;font-size:12px;text-align:right;border-bottom:1px solid #f1f5f9">${item.quantity}</td>
-          <td style="padding:10px 14px;font-size:12px;text-align:right;border-bottom:1px solid #f1f5f9">${fmt2(item.unitPrice)}</td>
-          <td style="padding:10px 14px;font-size:12px;text-align:right;border-bottom:1px solid #f1f5f9"><strong>${fmt2(item.quantity * item.unitPrice)}</strong></td>
-        </tr>`).join('');
-      const html = `<div id="pdf-content" style="font-family:'Segoe UI',Arial,sans-serif;color:#0f0f0f;background:#fff;padding:40px;max-width:800px;margin:0 auto">
+
+      // Div-based items rows (html2canvas tables are unreliable when off-screen)
+      const itemRows = enriched.items.map((item: any, i: number) => `
+        <div style="display:flex;align-items:center;background:${i % 2 === 0 ? '#fff' : '#fafafa'};border-bottom:1px solid #f1f5f9;padding:0">
+          <div style="width:36px;padding:10px 14px;font-size:12px;flex-shrink:0">${i + 1}</div>
+          <div style="flex:2;padding:10px 14px;font-size:12px;font-weight:700">${item.description || ''}</div>
+          <div style="flex:1;padding:10px 14px;font-size:12px">${item.serviceType || ''}</div>
+          <div style="width:50px;padding:10px 14px;font-size:12px;text-align:right;flex-shrink:0">${item.quantity}</div>
+          <div style="width:100px;padding:10px 14px;font-size:12px;text-align:right;flex-shrink:0">${fmt2(item.unitPrice)}</div>
+          <div style="width:110px;padding:10px 14px;font-size:12px;text-align:right;font-weight:700;flex-shrink:0">${fmt2(item.quantity * item.unitPrice)}</div>
+        </div>`).join('');
+
+      const html = `<div id="pdf-content" style="font-family:Arial,Helvetica,sans-serif;color:#0f0f0f;background:#fff;padding:40px;width:780px;box-sizing:border-box">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:24px;border-bottom:3px solid #0f0f0f;margin-bottom:24px">
           <div>
             <div style="font-size:26px;font-weight:900;letter-spacing:-1px">Iza<span style="color:#7c3aed">Xotic</span></div>
-            <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin-top:4px">Custom Web Development & UI/UX Design Studio</div>
+            <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin-top:4px">Custom Web Development &amp; UI/UX Design Studio</div>
             <div style="font-size:11px;color:#555;margin-top:8px;line-height:1.7">Remote-First, India<br>hello@izaxotic.com</div>
           </div>
           <div style="text-align:right">
@@ -168,39 +172,40 @@ export default function Invoices() {
           <div style="flex:1">
             <div style="font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-family:monospace">Details</div>
             <div style="font-size:12px;color:#555;line-height:1.8">
-              <strong style="color:#0f0f0f">Date:</strong> ${fmtDate(enriched.createdAt)}<br>
-              <strong style="color:#0f0f0f">Due:</strong> ${fmtDate(enriched.dueDate)}<br>
-              ${enriched.projectName ? `<strong style="color:#0f0f0f">Project:</strong> ${enriched.projectName}<br>` : ''}
-              ${enriched.paymentTerms ? `<strong style="color:#0f0f0f">Terms:</strong> ${enriched.paymentTerms}` : ''}
+              <span style="font-weight:700;color:#0f0f0f">Date:</span> ${fmtDate(enriched.createdAt)}<br>
+              <span style="font-weight:700;color:#0f0f0f">Due:</span> ${fmtDate(enriched.dueDate)}<br>
+              ${enriched.projectName ? `<span style="font-weight:700;color:#0f0f0f">Project:</span> ${enriched.projectName}<br>` : ''}
+              ${enriched.paymentTerms ? `<span style="font-weight:700;color:#0f0f0f">Terms:</span> ${enriched.paymentTerms}` : ''}
             </div>
           </div>
         </div>
-        <table style="width:100%;border-collapse:collapse;margin:16px 0">
-          <thead><tr style="background:#0f0f0f;color:white">
-            <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:1px">#</th>
-            <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:1px">Description</th>
-            <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:1px">Service</th>
-            <th style="padding:12px 14px;text-align:right;font-size:11px;font-weight:700;letter-spacing:1px">Qty</th>
-            <th style="padding:12px 14px;text-align:right;font-size:11px;font-weight:700;letter-spacing:1px">Unit Price</th>
-            <th style="padding:12px 14px;text-align:right;font-size:11px;font-weight:700;letter-spacing:1px">Amount</th>
-          </tr></thead>
-          <tbody>${items}</tbody>
-        </table>
+        <div style="border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;margin:16px 0">
+          <div style="display:flex;align-items:center;background:#0f0f0f;color:white;padding:0">
+            <div style="width:36px;padding:12px 14px;font-size:11px;font-weight:700;flex-shrink:0">#</div>
+            <div style="flex:2;padding:12px 14px;font-size:11px;font-weight:700">Description</div>
+            <div style="flex:1;padding:12px 14px;font-size:11px;font-weight:700">Service</div>
+            <div style="width:50px;padding:12px 14px;font-size:11px;font-weight:700;text-align:right;flex-shrink:0">Qty</div>
+            <div style="width:100px;padding:12px 14px;font-size:11px;font-weight:700;text-align:right;flex-shrink:0">Unit Price</div>
+            <div style="width:110px;padding:12px 14px;font-size:11px;font-weight:700;text-align:right;flex-shrink:0">Amount</div>
+          </div>
+          ${itemRows}
+        </div>
         <div style="margin-left:auto;width:280px;margin-top:16px">
           <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee"><span>Subtotal</span><span>${fmt2(enriched.subtotal)}</span></div>
-          ${enriched.discountAmt > 0 ? `<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee;color:#059669"><span>Discount</span><span>−${fmt2(enriched.discountAmt)}</span></div>` : ''}
+          ${enriched.discountAmt > 0 ? `<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee;color:#059669"><span>Discount</span><span>- ${fmt2(enriched.discountAmt)}</span></div>` : ''}
           ${enriched.taxRate > 0 ? `<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #eee"><span>GST (${enriched.taxRate}%)</span><span>${fmt2(enriched.taxAmount)}</span></div>` : ''}
           <div style="display:flex;justify-content:space-between;padding:12px 0 4px;font-size:20px;font-weight:900;border-top:3px solid #0f0f0f;margin-top:4px"><span>Total</span><span>${fmt2(enriched.total)}</span></div>
         </div>
-        ${enriched.notes ? `<div style="background:#fafafa;border-left:4px solid #0f0f0f;padding:14px 18px;border-radius:0 8px 8px 0;margin-top:24px;font-size:12px;line-height:1.7;color:#555"><strong>Notes:</strong><br>${enriched.notes}</div>` : ''}
+        ${enriched.notes ? `<div style="background:#fafafa;border-left:4px solid #0f0f0f;padding:14px 18px;border-radius:0 8px 8px 0;margin-top:24px;font-size:12px;line-height:1.7;color:#555"><span style="font-weight:700">Notes:</span><br>${enriched.notes}</div>` : ''}
         <div style="margin-top:40px;padding-top:16px;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;font-size:11px;color:#888">
-          <div>Thank you for choosing IzaXotic!<br><span style="font-family:monospace;font-size:9px;color:#ddd;opacity:0.35;letter-spacing:0.5px">SYS://GENERATED · IzaXpro · ${new Date().getFullYear()}</span></div>
-          <div style="text-align:right">Authorized Signatory<br><strong style="color:#0f0f0f">IzaXotic</strong></div>
+          <div>Thank you for choosing IzaXotic!<br><span style="font-family:monospace;font-size:9px;color:#ccc;letter-spacing:0.5px">SYS://GENERATED - IzaXpro - ${new Date().getFullYear()}</span></div>
+          <div style="text-align:right">Authorized Signatory<br><span style="font-weight:900;color:#0f0f0f">IzaXotic</span></div>
         </div>
       </div>`;
 
       const container = document.createElement('div');
-      container.style.cssText = 'position:fixed;left:-9999px;top:0;background:#fff;z-index:-1';
+      // Use visibility:hidden + position:absolute so html2canvas can measure layout properly
+      container.style.cssText = 'position:absolute;top:0;left:0;visibility:hidden;pointer-events:none;z-index:-1';
       container.innerHTML = html;
       document.body.appendChild(container);
       const canvas = await html2canvas(container.firstChild as HTMLElement, { scale: 2, useCORS: true, backgroundColor: '#fff' });
