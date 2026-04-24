@@ -70,7 +70,8 @@ export default function Invoices() {
   const updateItem = (idx: number, field: string, val: any) => {
     setForm((f: any) => {
       const items = [...f.items];
-      items[idx] = { ...items[idx], [field]: field === 'quantity' || field === 'unitPrice' ? Number(val) : val };
+      // Keep raw string while typing so leading-zero / clearing works naturally
+      items[idx] = { ...items[idx], [field]: val };
       return { ...f, items };
     });
   };
@@ -191,7 +192,7 @@ export default function Invoices() {
         </div>
         ${enriched.notes ? `<div style="background:#fafafa;border-left:4px solid #0f0f0f;padding:14px 18px;border-radius:0 8px 8px 0;margin-top:24px;font-size:12px;line-height:1.7;color:#555"><strong>Notes:</strong><br>${enriched.notes}</div>` : ''}
         <div style="margin-top:40px;padding-top:16px;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;font-size:11px;color:#888">
-          <div>Thank you for choosing IzaXotic!<br><span style="font-family:monospace;font-size:10px;color:#bbb">SYS://GENERATED · IzaXpro · ${new Date().getFullYear()}</span></div>
+          <div>Thank you for choosing IzaXotic!<br><span style="font-family:monospace;font-size:9px;color:#ddd;opacity:0.35;letter-spacing:0.5px">SYS://GENERATED · IzaXpro · ${new Date().getFullYear()}</span></div>
           <div style="text-align:right">Authorized Signatory<br><strong style="color:#0f0f0f">IzaXotic</strong></div>
         </div>
       </div>`;
@@ -358,8 +359,8 @@ export default function Invoices() {
                         <select value={item.serviceType} onChange={e => updateItem(idx, 'serviceType', e.target.value)}>
                           {SERVICE_TYPES.map(t => <option key={t}>{t}</option>)}
                         </select>
-                        <input type="number" min={1} value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} />
-                        <input type="number" min={0} value={item.unitPrice} onChange={e => updateItem(idx, 'unitPrice', e.target.value)} />
+                        <input type="number" min={1} value={item.quantity === 0 || item.quantity === '' ? '' : item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} />
+                        <input type="number" min={0} value={item.unitPrice === 0 || item.unitPrice === '' ? '' : item.unitPrice} onChange={e => updateItem(idx, 'unitPrice', e.target.value)} />
                         <div style={{ fontWeight: 700, fontSize: 13 }}>{fmt(item.quantity * item.unitPrice)}</div>
                         <button type="button" onClick={() => removeItem(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 16, lineHeight: 1 }} disabled={form.items.length === 1}>✕</button>
                       </div>
@@ -382,8 +383,8 @@ export default function Invoices() {
                       <input
                         type="number" min={0} className="form-input"
                         style={{ width: 90, padding: '4px 8px', fontSize: 13, textAlign: 'right' }}
-                        value={form.discount}
-                        onChange={e => setForm((f: any) => ({ ...f, discount: Number(e.target.value) }))}
+                        value={form.discount === 0 || form.discount === '' ? '' : form.discount}
+                        onChange={e => setForm((f: any) => ({ ...f, discount: e.target.value }))}
                         placeholder="0"
                       />
                       <span style={{ minWidth: 80, textAlign: 'right', color: '#34d399', fontWeight: 600 }}>
@@ -396,8 +397,8 @@ export default function Invoices() {
                       <input
                         type="number" min={0} max={30} className="form-input"
                         style={{ width: 90, padding: '4px 8px', fontSize: 13, textAlign: 'right' }}
-                        value={form.taxRate}
-                        onChange={e => setForm((f: any) => ({ ...f, taxRate: Number(e.target.value) }))}
+                        value={form.taxRate === 0 || form.taxRate === '' ? '' : form.taxRate}
+                        onChange={e => setForm((f: any) => ({ ...f, taxRate: e.target.value }))}
                       />
                       <span style={{ minWidth: 80, textAlign: 'right', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
                         +{fmt(totals.taxAmount)}
