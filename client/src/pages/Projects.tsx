@@ -3,18 +3,19 @@ import { Plus, Pencil, Trash2, Target, ChevronDown, ChevronUp } from 'lucide-rea
 import toast from 'react-hot-toast';
 import { projectsAPI, clientsAPI, milestonesAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
-
-const STATUSES = ['Not Started', 'In Progress', 'Completed', 'On Hold'];
-const TYPES = ['Web Development', 'Mobile App', 'UI/UX Design', 'Software Development', 'E-Commerce', 'Maintenance'];
+import { useConfig } from '../hooks/useConfig';
 
 const emptyForm = {
-  name: '', clientId: '', type: 'Web Development', description: '',
+  name: '', clientId: '', type: '', description: '',
   startDate: '', deadline: '', estimatedHours: '', budget: '', status: 'Not Started', progress: 0
 };
 
 const emptyMilestone = { title: '', description: '', dueDate: '', status: 'Not Started', completion: 0 };
 
 export default function Projects() {
+  const { config } = useConfig();
+  const STATUSES = config.projectStatuses || [];
+  const TYPES = config.projectTypes || [];
   const [projects, setProjects] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const [milestones, setMilestones] = useState<any[]>([]);
@@ -285,7 +286,7 @@ export default function Projects() {
                   <div className="form-group">
                     <label className="form-label">Status</label>
                     <select className="form-control" value={msForm.status} onChange={e => setMsForm((f: any) => ({ ...f, status: e.target.value }))}>
-                      {STATUSES.map(s => <option key={s}>{s}</option>)}
+                      {(config.milestoneStatuses || STATUSES).map((s: string) => <option key={s}>{s}</option>)}
                     </select>
                   </div>
                 </div>

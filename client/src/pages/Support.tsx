@@ -2,18 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, Headphones, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supportAPI, clientsAPI, projectsAPI } from '../services/api';
-
-const STATUSES = ['Open', 'In Progress', 'Resolved', 'Closed'];
-const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
-const TYPES = ['Bug Fix', 'Feature Request', 'Maintenance', 'Performance', 'Design Change', 'Content Update', 'AMC', 'Other'];
+import { useConfig } from '../hooks/useConfig';
 
 const emptyForm = {
   clientId: '', clientName: '', projectId: '', projectName: '',
-  title: '', description: '', type: 'Bug Fix', priority: 'Medium', status: 'Open',
+  title: '', description: '', type: '', priority: 'Medium', status: 'Open',
   estimatedHours: '', notes: ''
 };
 
 export default function Support() {
+  const { config } = useConfig();
+  const STATUSES = config.supportStatuses || [];
+  const PRIORITIES = config.supportPriorities || [];
+  const TYPES = config.supportTypes || [];
   const [tickets, setTickets] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);

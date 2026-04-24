@@ -3,11 +3,9 @@ import { Plus, Pencil, Trash2, FileQuestion, Download, ArrowRight } from 'lucide
 import toast from 'react-hot-toast';
 import { quotationsAPI, clientsAPI, projectsAPI, pdfAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
+import { useConfig } from '../hooks/useConfig';
 
-const STATUSES = ['Draft', 'Sent', 'Accepted', 'Rejected', 'Converted'];
-const SERVICE_TYPES = ['Web Development', 'UI/UX Design', 'Mobile App', 'Maintenance', 'Consulting', 'Hosting', 'SEO', 'Other'];
-
-const emptyItem = { description: '', serviceType: 'Web Development', quantity: 1, unitPrice: 0 };
+const emptyItem = { description: '', serviceType: '', quantity: 1, unitPrice: 0 };
 const emptyForm = {
   clientId: '', clientName: '', clientEmail: '', clientPhone: '', clientCompany: '', clientAddress: '',
   projectId: '', projectName: '', items: [{ ...emptyItem }],
@@ -17,6 +15,9 @@ const emptyForm = {
 const fmt = (n: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n || 0);
 
 export default function Quotations() {
+  const { config } = useConfig();
+  const STATUSES = config.quotationStatuses || [];
+  const SERVICE_TYPES = config.services || [];
   const [quotations, setQuotations] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);

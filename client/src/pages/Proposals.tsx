@@ -3,8 +3,7 @@ import { Plus, Pencil, Trash2, FileCheck, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { proposalsAPI, clientsAPI, pdfAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
-
-const STATUSES = ['Draft', 'Sent', 'Under Review', 'Accepted', 'Rejected'];
+import { useConfig } from '../hooks/useConfig';
 
 const emptyForm: any = {
   clientId: '', clientName: '', clientEmail: '', clientCompany: '',
@@ -22,6 +21,8 @@ const emptyForm: any = {
 };
 
 export default function Proposals() {
+  const { config } = useConfig();
+  const STATUSES = config.proposalStatuses || [];
   const [proposals, setProposals] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

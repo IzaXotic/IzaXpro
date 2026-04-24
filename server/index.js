@@ -51,6 +51,7 @@ app.use('/api/milestones', require('./routes/milestones'));
 app.use('/api/support',    require('./routes/support'));
 app.use('/api/dashboard',  require('./routes/dashboard'));
 app.use('/api/pdf',        require('./routes/pdf'));
+app.use('/api/config',     require('./routes/config'));
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date().toISOString() }));

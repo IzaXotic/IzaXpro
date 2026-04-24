@@ -3,20 +3,21 @@ import { Plus, Pencil, Trash2, FileText, Download, ArrowRight, Send } from 'luci
 import toast from 'react-hot-toast';
 import { invoicesAPI, clientsAPI, projectsAPI, pdfAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
+import { useConfig } from '../hooks/useConfig';
 
-const STATUSES = ['Draft', 'Sent', 'Paid', 'Overdue', 'Cancelled'];
-const SERVICE_TYPES = ['Web Development', 'UI/UX Design', 'Mobile App', 'Maintenance', 'Consulting', 'Hosting', 'Domain', 'SEO', 'Content', 'Other'];
-
-const emptyItem = { description: '', serviceType: 'Web Development', quantity: 1, unitPrice: 0 };
+const emptyItem = { description: '', serviceType: '', quantity: 1, unitPrice: 0 };
 const emptyForm = {
   clientId: '', clientName: '', clientEmail: '', clientPhone: '', clientCompany: '', clientAddress: '',
   projectId: '', projectName: '', items: [{ ...emptyItem }],
-  taxRate: 18, discount: 0, notes: '', paymentTerms: 'Net 30', status: 'Draft', dueDate: ''
+  taxRate: 18, discount: 0, notes: '', paymentTerms: '', status: 'Draft', dueDate: ''
 };
 
 const fmt = (n: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n || 0);
 
 export default function Invoices() {
+  const { config } = useConfig();
+  const STATUSES = config.invoiceStatuses || [];
+  const SERVICE_TYPES = config.services || [];
   const [invoices, setInvoices] = useState<any[]>([]);
   const [clients, setClients]   = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);

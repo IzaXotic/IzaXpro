@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, User, Mail, Phone, Building } from 'lucide-react';
+import { Plus, Pencil, Trash2, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { clientsAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
-
-const STATUSES = ['New', 'Active', 'In Progress', 'On Hold', 'Completed'];
-const SERVICES = ['Web Development', 'Mobile App', 'UI/UX Design', 'Software Development', 'E-Commerce', 'Maintenance', 'Consulting'];
+import { useConfig } from '../hooks/useConfig';
 
 const emptyForm = {
   name: '', email: '', phone: '', company: '', address: '',
@@ -13,6 +11,9 @@ const emptyForm = {
 };
 
 export default function Clients() {
+  const { config } = useConfig();
+  const STATUSES = config.clientStatuses || [];
+  const SERVICES = config.services || [];
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);

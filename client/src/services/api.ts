@@ -68,4 +68,9 @@ export const pdfAPI = {
   generateProposal: (id: string) => API.post(`/pdf/proposal/${id}`)
 };
 
+export const configAPI = {
+  getAll: () => API.get('/config'),
+  update: (key: string, values: string[]) => API.put(`/config/${key}`, { values })
+};
+
 export default API;

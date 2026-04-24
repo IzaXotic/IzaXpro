@@ -1,16 +1,1 @@
-[
-  {
-    "id": "a133d3bd-3193-4a63-b499-c9b8fa72a0e0",
-    "projectId": "b15ca216-5363-47bc-853f-35ba10c1fff2",
-    "clientId": "cb302b37-1040-4a54-a753-e0127bd6ac28",
-    "name": "UI/UX Design & Wireframes Complete",
-    "description": "All wireframes, high-fidelity mockups, and design system components handed off.",
-    "status": "Completed",
-    "dueDate": "2026-03-20",
-    "completedDate": "2026-03-18",
-    "amount": 25000,
-    "notes": "Client approved all designs on 18 Mar 2026. Moving to development phase.",
-    "createdAt": "2026-03-01T10:00:00.000Z",
-    "updatedAt": "2026-03-18T15:00:00.000Z"
-  }
-]
+[]

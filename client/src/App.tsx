@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import {
   LayoutDashboard, Users, FolderKanban, FileText,
-  FileQuestion, FileCheck, Headphones, ChevronRight, BookOpen
+  FileQuestion, FileCheck, Headphones, ChevronRight, BookOpen, Settings as SettingsIcon
 } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
@@ -12,9 +12,10 @@ import Quotations from './pages/Quotations';
 import Proposals from './pages/Proposals';
 import Support from './pages/Support';
 import Help from './pages/Help';
+import Settings from './pages/Settings';
 import Tooltip from './components/Tooltip';
 
-type Page = 'dashboard' | 'clients' | 'projects' | 'invoices' | 'quotations' | 'proposals' | 'support' | 'help';
+type Page = 'dashboard' | 'clients' | 'projects' | 'invoices' | 'quotations' | 'proposals' | 'support' | 'help' | 'settings';
 
 const navItems: { id: Page; label: string; icon: React.ReactNode; section?: string; tooltip: string }[] = [
   { id: 'dashboard',  label: 'Dashboard',   icon: <LayoutDashboard size={17} />, section: 'MAIN',       tooltip: 'Overview — stats, revenue & project charts' },
@@ -24,7 +25,8 @@ const navItems: { id: Page; label: string; icon: React.ReactNode; section?: stri
   { id: 'quotations', label: 'Quotations',  icon: <FileQuestion size={17} />,                           tooltip: 'Generate price quotes for clients' },
   { id: 'proposals',  label: 'Proposals',   icon: <FileCheck size={17} />,                              tooltip: 'Build proposals with payment splits' },
   { id: 'support',    label: 'Support',     icon: <Headphones size={17} />,      section: 'POST-LAUNCH', tooltip: 'Post-launch tickets & maintenance tracking' },
-  { id: 'help',       label: 'Help & Docs', icon: <BookOpen size={17} />,        section: 'TEAM',       tooltip: 'Team docs, field guide & FAQ' },
+  { id: 'settings',   label: 'Settings',    icon: <SettingsIcon size={17} />,    section: 'SYSTEM',     tooltip: 'Manage dropdown options & app configuration' },
+  { id: 'help',       label: 'Help & Docs', icon: <BookOpen size={17} />,                              tooltip: 'Team docs, field guide & FAQ' },
 ];
 
 const pageInfo: Record<Page, { title: string; subtitle: string }> = {
@@ -35,6 +37,7 @@ const pageInfo: Record<Page, { title: string; subtitle: string }> = {
   quotations: { title: 'Quotations', subtitle: 'SYS://QUOTATION_MODULE — READY' },
   proposals:  { title: 'Proposals',  subtitle: 'SYS://PROPOSAL_BUILDER — ACTIVE' },
   support:    { title: 'Support',    subtitle: 'SYS://TICKET_SYSTEM — MONITORING' },
+  settings:   { title: 'Settings',   subtitle: 'SYS://CONFIG — EDITABLE' },
   help:       { title: 'Help & Docs', subtitle: 'SYS://KNOWLEDGE_BASE — ONLINE' },
 };
 
@@ -50,6 +53,7 @@ function App() {
       case 'quotations': return <Quotations />;
       case 'proposals':  return <Proposals />;
       case 'support':    return <Support />;
+      case 'settings':   return <Settings />;
       case 'help':       return <Help />;
       default:           return <Dashboard />;
     }
