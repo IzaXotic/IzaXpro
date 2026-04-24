@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, FileQuestion, Download, ArrowRight } from 'lucide
 import toast from 'react-hot-toast';
 import { quotationsAPI, clientsAPI, projectsAPI, pdfAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
+import DatePicker from '../components/DatePicker';
 import { useConfig } from '../hooks/useConfig';
 import type { Client, Project, Quotation } from '../types';
 
@@ -170,7 +171,7 @@ export default function Quotations() {
                   </div>
                   <div className="form-group">
                     <FieldLabel label="Valid Until" tip="Expiry date of this quote. After this date the price is no longer guaranteed — communicate it to the client." />
-                    <input type="date" className="form-control" value={form.validUntil?.split('T')[0] || ''} onChange={e => setForm((f: any) => ({ ...f, validUntil: e.target.value }))} />
+                    <DatePicker value={form.validUntil?.split('T')[0] || ''} onChange={val => setForm((f: any) => ({ ...f, validUntil: val }))} />
                   </div>
                 </div>
 

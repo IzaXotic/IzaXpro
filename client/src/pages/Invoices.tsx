@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, FileText, Download, ArrowRight, Send } from 'luci
 import toast from 'react-hot-toast';
 import { invoicesAPI, clientsAPI, projectsAPI, pdfAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
+import DatePicker from '../components/DatePicker';
 import { useConfig } from '../hooks/useConfig';
 import type { Client, Project, Invoice } from '../types';
 
@@ -212,7 +213,7 @@ export default function Invoices() {
                   </div>
                   <div className="form-group">
                     <FieldLabel label="Due Date" tip="Payment deadline for this invoice. Overdue invoices should be chased and marked accordingly." />
-                    <input type="date" className="form-control" value={form.dueDate?.split('T')[0] || ''} onChange={e => setForm((f: any) => ({ ...f, dueDate: e.target.value }))} />
+                    <DatePicker value={form.dueDate?.split('T')[0] || ''} onChange={val => setForm((f: any) => ({ ...f, dueDate: val }))} />
                   </div>
                   <div className="form-group">
                     <FieldLabel label="Payment Terms" tip="Standard payment window communicated to the client. Printed on the PDF." />

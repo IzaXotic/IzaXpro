@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, Target, ChevronDown, ChevronUp } from 'lucide-rea
 import toast from 'react-hot-toast';
 import { projectsAPI, clientsAPI, milestonesAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
+import DatePicker from '../components/DatePicker';
 import { useConfig } from '../hooks/useConfig';
 import type { Client, Project, Milestone } from '../types';
 
@@ -220,11 +221,11 @@ export default function Projects() {
                   </div>
                   <div className="form-group">
                     <FieldLabel label="Start Date" tip="Planned kickoff date. Informational — does not trigger any automation." />
-                    <input type="date" className="form-control" value={form.startDate?.split('T')[0] || ''} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} />
+                    <DatePicker value={form.startDate?.split('T')[0] || ''} onChange={val => setForm(f => ({ ...f, startDate: val }))} />
                   </div>
                   <div className="form-group">
                     <FieldLabel label="Deadline" tip="Final delivery date. Shown in the project card and used for overdue tracking." />
-                    <input type="date" className="form-control" value={form.deadline?.split('T')[0] || ''} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} />
+                    <DatePicker value={form.deadline?.split('T')[0] || ''} onChange={val => setForm(f => ({ ...f, deadline: val }))} />
                   </div>
                   <div className="form-group">
                     <FieldLabel label="Budget (₹)" tip="Estimated budget for reference. Does not auto-generate invoices — raise invoices separately." />
@@ -297,7 +298,7 @@ export default function Projects() {
                 <div className="grid-2">
                   <div className="form-group">
                     <label className="form-label">Due Date</label>
-                    <input type="date" className="form-control" value={msForm.dueDate?.split('T')[0] || ''} onChange={e => setMsForm((f: any) => ({ ...f, dueDate: e.target.value }))} />
+                    <DatePicker value={msForm.dueDate?.split('T')[0] || ''} onChange={val => setMsForm((f: any) => ({ ...f, dueDate: val }))} />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Status</label>

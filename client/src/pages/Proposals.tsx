@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, FileCheck, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { proposalsAPI, clientsAPI, pdfAPI } from '../services/api';
 import FieldLabel from '../components/FieldLabel';
+import DatePicker from '../components/DatePicker';
 import { useConfig } from '../hooks/useConfig';
 import type { Client, Proposal } from '../types';
 
@@ -196,7 +197,7 @@ export default function Proposals() {
                   </div>
                   <div className="form-group">
                     <FieldLabel label="Valid Until" tip="Expiry date of this proposal. After this date, pricing and scope are subject to review." />
-                    <input type="date" className="form-control" value={form.validUntil?.split('T')[0] || ''} onChange={e => setForm((f: any) => ({ ...f, validUntil: e.target.value }))} />
+                    <DatePicker value={form.validUntil?.split('T')[0] || ''} onChange={val => setForm((f: any) => ({ ...f, validUntil: val }))} />
                   </div>
                 </div>
 
